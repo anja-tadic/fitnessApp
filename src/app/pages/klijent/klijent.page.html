@@ -1,0 +1,53 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Train Club</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="background-glow"></div>
+
+  <div class="welcome-container">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="60" height="60">
+      <rect x="10" y="45" width="80" height="10" rx="5" fill="#8B5CF6"/>
+      <rect x="10" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
+      <rect x="75" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
+      <rect x="2" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
+      <rect x="88" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
+    </svg>
+    <h1 class="welcome-title">Dobrodošli!</h1>
+    <p class="welcome-subtitle">Vaš trening čeka</p>
+  </div>
+
+  <div class="menu-container">
+    <ion-card class="menu-card" (click)="goToTreninzi()">
+      <ion-card-content>
+        <ion-icon name="fitness-outline"></ion-icon>
+        <h2>Treninzi</h2>
+        <p>Pregledajte dostupne termine</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="menu-card" (click)="goToMojiTermini()">
+      <ion-card-content>
+        <ion-icon name="calendar-outline"></ion-icon>
+        <h2>Moji termini</h2>
+        <p>Vaši zakazani treninzi</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="menu-card" (click)="goToQR()">
+      <ion-card-content>
+        <ion-icon name="qr-code-outline"></ion-icon>
+        <h2>QR Kod</h2>
+        <p>Prijavite prisustvo</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>

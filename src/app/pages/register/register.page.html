@@ -1,0 +1,60 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <div class="background-glow"></div>
+
+  <div class="logo-container">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="60" height="60">
+      <rect x="10" y="45" width="80" height="10" rx="5" fill="#8B5CF6"/>
+      <rect x="10" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
+      <rect x="75" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
+      <rect x="2" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
+      <rect x="88" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
+    </svg>
+    <h1 class="app-title">Train Club</h1>
+    <p class="app-subtitle">Kreirajte nalog</p>
+  </div>
+
+  <div class="form-container">
+    <ion-item class="custom-item">
+      <ion-label position="floating">Ime i prezime</ion-label>
+      <ion-input type="text" [(ngModel)]="name"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-label position="floating">Email</ion-label>
+      <ion-input type="email" [(ngModel)]="email"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-label position="floating">Lozinka</ion-label>
+      <ion-input type="password" [(ngModel)]="password"></ion-input>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-label>Pol</ion-label>
+      <ion-select [(ngModel)]="gender" interface="popover">
+        <ion-select-option value="muski">Muški</ion-select-option>
+        <ion-select-option value="zenski">Ženski</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item class="custom-item">
+      <ion-label position="floating">Broj telefona</ion-label>
+      <ion-input type="tel" [(ngModel)]="phone"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" class="register-btn" (click)="register()">
+      Registruj se →
+    </ion-button>
+
+    <ion-button expand="block" fill="clear" class="login-link" (click)="goToLogin()">
+      Već imate nalog? Prijavite se
+    </ion-button>
+  </div>
+
+</ion-content>
