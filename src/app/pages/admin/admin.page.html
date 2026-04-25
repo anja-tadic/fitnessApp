@@ -1,13 +1,25 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>admin</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">admin</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+    <ion-tab-button tab="korisnici" href="/admin/korisnici">
+      <ion-icon name="people-outline"></ion-icon>
+      <ion-label>Korisnici</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="treneri" href="/admin/treneri">
+      <ion-icon name="barbell-outline"></ion-icon>
+      <ion-label>Treneri</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="treninzi" href="/admin/treninzi">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <ion-label>Treninzi</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="qr" href="/admin/qr">
+      <ion-icon name="qr-code-outline"></ion-icon>
+      <ion-label>QR Kod</ion-label>
+    </ion-tab-button>
+
+  </ion-tab-bar>
+</ion-tabs>

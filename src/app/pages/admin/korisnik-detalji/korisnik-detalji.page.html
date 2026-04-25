@@ -1,0 +1,53 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin/korisnici"></ion-back-button>
+      <!-- Dugme za povratak na listu korisnika -->
+    </ion-buttons>
+    <ion-title>Profil korisnika</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <div *ngIf="korisnik">
+    <!-- Prikazujemo podatke samo ako su učitani -->
+
+    <ion-item>
+      <ion-label>
+        <p>Ime i prezime</p>
+        <h2>{{ korisnik.name }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Email</p>
+        <h2>{{ korisnik.email }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Uloga</p>
+        <h2>{{ korisnik.role }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Pol</p>
+        <h2>{{ korisnik.gender }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Telefon</p>
+        <h2>{{ korisnik.phone }}</h2>
+      </ion-label>
+    </ion-item>
+
+  </div>
+
+</ion-content>

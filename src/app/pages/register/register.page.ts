@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonToolbar, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, CommonModule, FormsModule]
+  imports: [IonContent, IonHeader, IonToolbar, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, CommonModule, FormsModule]
 })
 export class RegisterPage {
 
