@@ -60,8 +60,13 @@ export class TreneriPage implements OnInit {
 
   async dodajTrenera() {
     // Provera da li su sva polja popunjena
-    if (!this.noviTrener.name || !this.noviTrener.email || !this.noviTrener.password) {
+   if (!this.noviTrener.name || !this.noviTrener.email || !this.noviTrener.password) {
       alert('Ime, email i lozinka su obavezni!');
+      return;
+    }
+
+    if (!this.noviTrener.email.endsWith('@trener.com')) {
+      alert('Email trenera mora biti u formatu: ime@trener.com');
       return;
     }
 
@@ -77,11 +82,19 @@ export class TreneriPage implements OnInit {
       );
       alert('Trener uspešno dodat!');
       this.zatvoriFormu();
-    } catch (error) {
+  
+     } catch (error: any) {
       console.error('Greška:', error);
-      alert('Greška pri dodavanju trenera!');
+      if (error.code === 'auth/email-already-in-use') {
+        alert('Korisnik sa ovim emailom već postoji!');
+      } else if (error.code === 'auth/weak-password') {
+        alert('Lozinka mora imati najmanje 6 karaktera!');
+      } else {
+        alert('Greška pri dodavanju trenera!');
+      }
     }
-  }
+    }
+  
 
   async obrisiTrenera(uid: string) {
     if (confirm('Da li ste sigurni da želite da obrišete ovog trenera?')) {
