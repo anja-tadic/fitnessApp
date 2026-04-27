@@ -1,13 +1,81 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>treninzi</ion-title>
+    <ion-title>Treninzi</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="otvoriFormu()">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">treninzi</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+
+  <!-- Forma za dodavanje treninga -->
+  <div *ngIf="prikaziFormu">
+
+    <ion-item>
+      <ion-label position="floating">Naziv treninga</ion-label>
+      <ion-input [(ngModel)]="noviTrening.naziv" type="text"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Trener</ion-label>
+      <ion-select [(ngModel)]="noviTrening.trenerUid" interface="popover">
+        <ion-select-option *ngFor="let trener of treneri" [value]="trener.uid">
+          {{ trener.name }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Datum i vreme</ion-label>
+      <ion-datetime-button datetime="datetime"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime
+            id="datetime"
+            [(ngModel)]="noviTrening.datum"
+            presentation="date-time"
+            [min]="minDatum">
+          </ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Kapacitet (max osoba)</ion-label>
+      <ion-input [(ngModel)]="noviTrening.kapacitet" type="number"></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" class="ion-margin-top" (click)="dodajTrening()">
+      Sačuvaj trening
+    </ion-button>
+    <ion-button expand="block" fill="clear" color="medium" (click)="zatvoriFormu()">
+      Otkaži
+    </ion-button>
+
+  </div>
+
+  <!-- Lista treninga -->
+  <ion-list *ngIf="!prikaziFormu">
+    <ion-item *ngFor="let trening of treninzi">
+      <ion-label>
+        <h2>{{ trening.naziv }}</h2>
+        <p>Trener: {{ trening.trenerIme }}</p>
+        <p>{{ trening.datum | date:'dd.MM.yyyy HH:mm' }}</p>
+        <p>Prijavljeni: {{ trening.prijavljeni }}/{{ trening.kapacitet }}</p>
+      </ion-label>
+      <ion-button slot="end" fill="clear" color="danger" (click)="obrisiTrening(trening.id)">
+        <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <ion-item *ngIf="treninzi.length === 0">
+      <ion-label class="ion-text-center">
+        <p>Nema treninga. Dodajte prvi trening.</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
 </ion-content>
