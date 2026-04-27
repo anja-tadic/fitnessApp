@@ -1,0 +1,52 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/zaposleni/moji-treninzi"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalji treninga</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="trening">
+
+    <ion-item>
+      <ion-label>
+        <p>Naziv</p>
+        <h2>{{ trening.naziv }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Datum i vreme</p>
+        <h2>{{ trening.datum | date:'dd.MM.yyyy HH:mm' }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Kapacitet</p>
+        <h2>{{ trening.prijavljeni }}/{{ trening.kapacitet }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item-divider>
+      <ion-label>Prijavljeni klijenti</ion-label>
+    </ion-item-divider>
+
+    <ion-item *ngFor="let klijent of klijenti">
+      <ion-label>
+        <h2>{{ klijent.name }}</h2>
+        <p>{{ klijent.email }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item *ngIf="klijenti.length === 0">
+      <ion-label class="ion-text-center">
+        <p>Nema prijavljenih klijenata.</p>
+      </ion-label>
+    </ion-item>
+
+  </div>
+</ion-content>

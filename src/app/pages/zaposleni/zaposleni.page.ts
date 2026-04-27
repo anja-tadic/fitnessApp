@@ -1,20 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { Component } from '@angular/core';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { calendarOutline, qrCodeOutline, barChartOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-zaposleni',
   templateUrl: './zaposleni.page.html',
   styleUrls: ['./zaposleni.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel]
 })
-export class ZaposleniPage implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
+export class ZaposleniPage {
+  constructor() {
+    addIcons({ calendarOutline, qrCodeOutline, barChartOutline });
   }
-
 }

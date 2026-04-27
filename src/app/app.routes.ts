@@ -51,7 +51,30 @@ export const routes: Routes = [
   },
   {
     path: 'zaposleni',
-    loadComponent: () => import('./pages/zaposleni/zaposleni.page').then(m => m.ZaposleniPage)
+    loadComponent: () => import('./pages/zaposleni/zaposleni.page').then(m => m.ZaposleniPage),
+    children: [
+      {
+        path: '',
+        redirectTo: 'moji-treninzi',
+        pathMatch: 'full'
+      },
+      {
+        path: 'moji-treninzi',
+        loadComponent: () => import('./pages/zaposleni/moji-treninzi/moji-treninzi.page').then(m => m.MojiTreninziPage)
+      },
+      {
+        path: 'qr-skener',
+        loadComponent: () => import('./pages/zaposleni/qr-skener/qr-skener.page').then(m => m.QrSkenerPage)
+      },
+      {
+        path: 'statistika',
+        loadComponent: () => import('./pages/zaposleni/statistika/statistika.page').then(m => m.StatistikaPage)
+      },
+      {
+        path: 'trening-detalji/:id',
+        loadComponent: () => import('./pages/zaposleni/trening-detalji/trening-detalji.page').then(m => m.TreningDetaljiPage)
+      }
+    ]
   },
   {
     path: 'klijent',
