@@ -1,0 +1,68 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Treneri</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="otvoriFormu()">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Forma za dodavanje trenera -->
+  <div *ngIf="prikaziFormu" class="forma-kontejner">
+    <ion-item>
+      <ion-label position="floating">Ime i prezime</ion-label>
+      <ion-input [(ngModel)]="noviTrener.name" type="text"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input [(ngModel)]="noviTrener.email" type="email"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Lozinka</ion-label>
+      <ion-input [(ngModel)]="noviTrener.password" type="password"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Telefon</ion-label>
+      <ion-input [(ngModel)]="noviTrener.phone" type="tel"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Pol</ion-label>
+      <ion-select [(ngModel)]="noviTrener.gender" interface="popover">
+        <ion-select-option value="muski">Muški</ion-select-option>
+        <ion-select-option value="zenski">Ženski</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-button expand="block" class="ion-margin-top" (click)="dodajTrenera()">
+      Sačuvaj trenera
+    </ion-button>
+    <ion-button expand="block" fill="clear" color="medium" (click)="zatvoriFormu()">
+      Otkaži
+    </ion-button>
+  </div>
+
+  <!-- Lista trenera -->
+  <ion-list *ngIf="!prikaziFormu">
+   <ion-item *ngFor="let trener of treneri" button detail (click)="otvoriProfil(trener.uid)">
+      <ion-label>
+        <h2>{{ trener.name }}</h2>
+        <p>{{ trener.email }}</p>
+        <p>{{ trener.phone }}</p>
+      </ion-label>
+      <ion-button slot="end" fill="clear" color="danger" (click)="obrisiTrenera(trener.uid)">
+        <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <ion-item *ngIf="treneri.length === 0">
+      <ion-label class="ion-text-center">
+        <p>Nema trenera. Dodajte prvog trenera.</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+</ion-content>

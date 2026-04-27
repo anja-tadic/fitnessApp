@@ -28,12 +28,16 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/korisnici/korisnici.page').then(m => m.KorisniciPage)
       },
       {
-        path: 'korisnik-detalji/:uid',//prosledjujemo i uid korisnika kroz rutu
+        path: 'korisnik-detalji/:uid',
         loadComponent: () => import('./pages/admin/korisnik-detalji/korisnik-detalji.page').then(m => m.KorisnikDetaljiPage)
       },
       {
         path: 'treneri',
         loadComponent: () => import('./pages/admin/treneri/treneri.page').then(m => m.TreneriPage)
+      },
+      {
+        path: 'trener-detalji/:uid',
+        loadComponent: () => import('./pages/admin/trener-detalji/trener-detalji.page').then(m => m.TrenerDetaljiPage)
       },
       {
         path: 'treninzi',
@@ -52,10 +56,5 @@ export const routes: Routes = [
   {
     path: 'klijent',
     loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage)
-  },
-  {
-    path: 'korisnik-detalji',
-    loadComponent: () => import('./pages/admin/korisnik-detalji/korisnik-detalji.page').then( m => m.KorisnikDetaljiPage)
-  },
-
+  }
 ];
