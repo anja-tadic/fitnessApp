@@ -79,5 +79,17 @@ export const routes: Routes = [
   {
     path: 'klijent',
     loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage)
+  },  {
+    path: 'treninzi',
+    loadComponent: () => import('./pages/klijent/treninzi/treninzi.page').then( m => m.TreninziPage)
+  },
+  {
+    path: 'moji-termini',
+    loadComponent: () => import('./pages/klijent/moji-termini/moji-termini.page').then( m => m.MojiTerminiPage)
+  },
+  {
+    path: 'qr-kod',
+    loadComponent: () => import('./pages/klijent/qr-kod/qr-kod.page').then( m => m.QrKodPage)
   }
+
 ];

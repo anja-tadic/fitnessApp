@@ -1,0 +1,38 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- Dugme za povratak na glavni meni klijenta -->
+      <ion-back-button defaultHref="/klijent"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Dostupni treninzi</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <!-- Prolazimo kroz sve dostupne treninge -->
+    <ion-item *ngFor="let trening of treninzi">
+      <ion-label>
+        <h2>{{ trening.naziv }}</h2>
+        <!-- Formatiramo datum u citljiv oblik -->
+        <p>{{ trening.datum | date:'dd.MM.yyyy HH:mm' }}</p>
+        <p>Trener: {{ trening.trenerIme }}</p>
+        <p>Slobodna mesta: {{ trening.kapacitet - trening.prijavljeni }}/{{ trening.kapacitet }}</p>
+      </ion-label>
+      <!-- Dugme za prijavu, onemoguceno ako je trening pun ili je klijent vec prijavljen -->
+      <ion-button 
+        slot="end" 
+        [disabled]="trening.prijavljen || trening.prijavljeni >= trening.kapacitet"
+        (click)="prijaviSe(trening)">
+        {{ trening.prijavljen ? 'Prijavljen' : trening.prijavljeni >= trening.kapacitet ? 'Puno' : 'Prijavi se' }}
+      </ion-button>
+    </ion-item>
+
+    <!-- Poruka ako nema dostupnih treninga -->
+    <ion-item *ngIf="treninzi.length === 0">
+      <ion-label class="ion-text-center">
+        <p>Nema dostupnih treninga.</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

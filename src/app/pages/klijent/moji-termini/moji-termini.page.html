@@ -1,0 +1,38 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- Dugme za povratak na glavni meni -->
+      <ion-back-button defaultHref="/klijent"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Moji termini</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <!-- Prolazimo kroz sve treninge na koje je klijent prijavljen -->
+    <ion-item *ngFor="let termin of termini">
+      <ion-label>
+        <h2>{{ termin.naziv }}</h2>
+        <p>{{ termin.datum | date:'dd.MM.yyyy HH:mm' }}</p>
+        <p>Trener: {{ termin.trenerIme }}</p>
+      </ion-label>
+      <!-- Dugme za otkazivanje, onemoguceno ako je manje od 1h do treninga -->
+      <ion-button 
+        slot="end" 
+        fill="clear"
+        color="danger"
+        [disabled]="!mozeDaOtkaze(termin.datum)"
+        (click)="otkazi(termin)">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-item>
+
+    <!-- Poruka ako nema prijavljenih termina -->
+    <ion-item *ngIf="termini.length === 0">
+      <ion-label class="ion-text-center">
+        <p>Nemate prijavljenih termina.</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
