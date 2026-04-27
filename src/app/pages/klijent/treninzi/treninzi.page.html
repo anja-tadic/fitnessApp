@@ -11,7 +11,7 @@
 <ion-content class="ion-padding">
   <ion-list>
     <!-- Prolazimo kroz sve dostupne treninge -->
-    <ion-item *ngFor="let trening of treninzi">
+   <ion-item *ngFor="let trening of treninzi" button detail (click)="otvoriDetalje(trening.id)">
       <ion-label>
         <h2>{{ trening.naziv }}</h2>
         <!-- Formatiramo datum u citljiv oblik -->
@@ -20,10 +20,10 @@
         <p>Slobodna mesta: {{ trening.kapacitet - trening.prijavljeni }}/{{ trening.kapacitet }}</p>
       </ion-label>
       <!-- Dugme za prijavu, onemoguceno ako je trening pun ili je klijent vec prijavljen -->
-      <ion-button 
+     <ion-button 
         slot="end" 
         [disabled]="trening.prijavljen || trening.prijavljeni >= trening.kapacitet"
-        (click)="prijaviSe(trening)">
+        (click)="$event.stopPropagation(); prijaviSe(trening)">
         {{ trening.prijavljen ? 'Prijavljen' : trening.prijavljeni >= trening.kapacitet ? 'Puno' : 'Prijavi se' }}
       </ion-button>
     </ion-item>

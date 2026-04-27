@@ -1,0 +1,43 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <!-- Dugme za povratak na listu treninga -->
+      <ion-back-button defaultHref="/treninzi"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalji treninga</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="trening">
+
+    <ion-item>
+      <ion-label>
+        <p>Naziv</p>
+        <h2>{{ trening.naziv }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Trener</p>
+        <h2>{{ trening.trenerIme }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Datum i vreme</p>
+        <h2>{{ trening.datum | date:'dd.MM.yyyy HH:mm' }}</h2>
+      </ion-label>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>
+        <p>Slobodna mesta</p>
+        <h2>{{ trening.kapacitet - trening.prijavljeni }}/{{ trening.kapacitet }}</h2>
+      </ion-label>
+    </ion-item>
+
+  </div>
+</ion-content>

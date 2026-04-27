@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonButton, IonBackButton, IonButtons } from '@ionic/angular/standalone';
 import { Firestore, collection, collectionData, query, where, getDocs, addDoc, updateDoc, doc, increment } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-treninzi',
   templateUrl: './treninzi.page.html',
@@ -17,7 +17,8 @@ export class TreninziPage implements OnInit {
 
   constructor(
     private firestore: Firestore,
-    private auth: Auth // koristimo da znamo koji je klijent prijavljen
+    private auth: Auth, // koristimo da znamo koji je klijent prijavljen
+     private router: Router,
   ) {}
 
   ngOnInit() {
@@ -100,5 +101,9 @@ export class TreninziPage implements OnInit {
       console.error('Greška:', error);
       alert('Greška pri prijavi!');
     }
+  }
+  otvoriDetalje(id: string) {
+    // Navigiramo na stranicu detalja i saljemo id treninga kroz rutu
+    this.router.navigate(['/trening-info', id]);
   }
 }

@@ -79,7 +79,8 @@ export const routes: Routes = [
   {
     path: 'klijent',
     loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage)
-  },  {
+  },
+  {
     path: 'treninzi',
     loadComponent: () => import('./pages/klijent/treninzi/treninzi.page').then( m => m.TreninziPage)
   },
@@ -90,6 +91,10 @@ export const routes: Routes = [
   {
     path: 'qr-kod',
     loadComponent: () => import('./pages/klijent/qr-kod/qr-kod.page').then( m => m.QrKodPage)
+  },
+ {
+    path: 'trening-info/:id',
+    loadComponent: () => import('./pages/klijent/trening-info/trening-info.page').then( m => m.TreningInfoPage)
   }
 
 ];
