@@ -1,0 +1,134 @@
+ion-toolbar {
+  --background: transparent;
+}
+
+ion-content {
+  --background: transparent;
+  background: radial-gradient(ellipse at top, #2d1b69 0%, #0f0a1e 60%) !important;
+}
+
+.background-glow {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.statistika-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.title {
+  color: #8B5CF6;
+  font-size: 26px;
+  font-weight: 800;
+  margin: 15px 0 20px 0;
+  letter-spacing: 2px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  flex: 1;
+  --background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  border-radius: 16px;
+
+  ion-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+
+    ion-icon {
+      font-size: 28px;
+      color: #8B5CF6;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    p {
+      color: #ffffff;
+      opacity: 0.6;
+      font-size: 12px;
+      margin: 5px 0 0 0;
+      text-align: center;
+    }
+  }
+}
+
+.lista-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  width: 100%;
+  margin: 10px 0 15px 0;
+  opacity: 0.8;
+}
+
+.dolazak-card {
+  width: 100%;
+  --background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 14px;
+  margin: 8px 0;
+
+  ion-card-content {
+    padding: 15px;
+  }
+}
+
+.dolazak-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  ion-icon {
+    font-size: 28px;
+    color: #8B5CF6;
+  }
+}
+
+.dolazak-info {
+  h3 {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+  }
+
+  p {
+    color: #ffffff;
+    opacity: 0.6;
+    font-size: 13px;
+    margin: 0;
+  }
+}
+
+.nema-podataka {
+  color: #ffffff;
+  opacity: 0.5;
+  font-size: 15px;
+  margin-top: 30px;
+}
