@@ -6,7 +6,7 @@ import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs } fro
 import { Auth } from '@angular/fire/auth';
 import { Html5Qrcode } from 'html5-qrcode';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline } from 'ionicons/icons';
+import { arrowBackOutline, logOutOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-qr-skener',
@@ -23,7 +23,7 @@ export class QrSkenerPage implements OnInit, OnDestroy {
   greska: boolean = false;
 
   constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
-    addIcons({ arrowBackOutline });
+    addIcons({ arrowBackOutline, logOutOutline });
   }
 
   ngOnInit() {}
@@ -64,7 +64,6 @@ export class QrSkenerPage implements OnInit, OnDestroy {
 
       const korisnik = userSnap.data();
 
-      // Provjeri da li je korisnik vec skeniran danas
       const danas = new Date();
       const pocetak = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate()).toISOString();
       const kraj = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate() + 1).toISOString();
@@ -83,7 +82,6 @@ export class QrSkenerPage implements OnInit, OnDestroy {
         return;
       }
 
-      // Zabeleži prisustvo
       await addDoc(collection(this.firestore, 'prisustvo'), {
         uid: uid,
         ime: korisnik['name'],
@@ -98,6 +96,11 @@ export class QrSkenerPage implements OnInit, OnDestroy {
       this.poruka = 'Greška pri bilježenju prisustva!';
       this.greska = true;
     }
+  }
+
+  async logout() {
+    await this.auth.signOut();
+    this.router.navigate(['/login']);
   }
 
   goBack() {

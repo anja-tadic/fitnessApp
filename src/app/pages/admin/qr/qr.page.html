@@ -1,6 +1,11 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Train Club</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="logout-btn" (click)="logout()">
+        Odjavi se
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -29,7 +34,6 @@
       Zaustavi skener
     </ion-button>
 
-    <!-- Validan QR kod -->
     <ion-card class="rezultat-card validan-card" *ngIf="validan && korisnik">
       <ion-card-content>
         <div class="rezultat-header">
@@ -46,7 +50,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Nevalidan QR kod -->
     <ion-card class="rezultat-card nevalidan-card" *ngIf="nevalidan">
       <ion-card-content>
         <div class="rezultat-header">

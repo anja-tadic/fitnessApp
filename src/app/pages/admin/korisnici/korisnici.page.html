@@ -1,21 +1,26 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Korisnici</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="logout-btn" (click)="logout()">
+        Odjavi se
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-list>
-    <ion-item *ngFor="let korisnik of korisnici$ | async" (click)="otvoriProfil(korisnik.uid)" button detail> <!-- Prolazi kroz listu korisnika i pravi red za svaki od njih-->
+    <ion-item *ngFor="let korisnik of korisnici$ | async" (click)="otvoriProfil(korisnik.uid)" button detail>
       <ion-label>
         <h2>{{ korisnik.name }}</h2>
         <p>{{ korisnik.email }}</p>
       </ion-label>
       <ion-badge slot="end" [color]="korisnik.role === 'admin' ? 'danger' : korisnik.role === 'zaposleni' ? 'warning' : 'primary'">
-        {{ korisnik.role }} <!--Ovo je nalepnica koja menja boju u zavisnosti koja je uloga korisnika-->
+        {{ korisnik.role }}
       </ion-badge>
       <ion-button slot="end" fill="clear" color="danger" (click)="$event.stopPropagation(); obrisiKorisnika(korisnik.uid)" *ngIf="korisnik.role !== 'admin'">
-        Obriši <!-- Dugme za brisanje korisnika, sa dodatnim ogranicenjem kako ne bismo slucajno obrisali admina-->
+        Obriši
       </ion-button>
     </ion-item>
   </ion-list>

@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardContent, IonIcon } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardContent, IonIcon, IonButton, IonButtons } from '@ionic/angular/standalone';
 import { Firestore, collection, getDocs, query, orderBy } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { personOutline, calendarOutline, timeOutline } from 'ionicons/icons';
+import { personOutline, calendarOutline, timeOutline, logOutOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-statistika',
   templateUrl: './statistika.page.html',
   styleUrls: ['./statistika.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardContent, IonIcon, CommonModule]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardContent, IonIcon, IonButton, IonButtons, CommonModule]
 })
 export class StatistikaPage implements OnInit {
 
@@ -18,8 +20,8 @@ export class StatistikaPage implements OnInit {
   ukupno: number = 0;
   danas: number = 0;
 
-  constructor(private firestore: Firestore) {
-    addIcons({ personOutline, calendarOutline, timeOutline });
+  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
+    addIcons({ personOutline, calendarOutline, timeOutline, logOutOutline });
   }
 
   async ngOnInit() {
@@ -47,10 +49,14 @@ export class StatistikaPage implements OnInit {
 
     this.ukupno = this.prisustva.length;
 
-    // Broj dolazaka danas
     const danas = new Date();
     const pocetak = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate()).toISOString();
     const kraj = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate() + 1).toISOString();
     this.danas = this.prisustva.filter(p => p.datum >= pocetak && p.datum < kraj).length;
+  }
+
+  async logout() {
+    await this.auth.signOut();
+    this.router.navigate(['/login']);
   }
 }

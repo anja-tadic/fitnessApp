@@ -2,8 +2,11 @@
   <ion-toolbar>
     <ion-title>Treninzi</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="otvoriFormu()">
-        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      <ion-button class="dodaj-btn" (click)="otvoriFormu()">
+        + Dodaj trening
+      </ion-button>
+      <ion-button class="logout-btn" (click)="logout()">
+        Odjavi se
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -11,7 +14,6 @@
 
 <ion-content class="ion-padding">
 
-  <!-- Forma za dodavanje treninga -->
   <div *ngIf="prikaziFormu">
 
     <ion-item>
@@ -57,7 +59,6 @@
 
   </div>
 
-  <!-- Lista treninga -->
   <ion-list *ngIf="!prikaziFormu">
     <ion-item *ngFor="let trening of treninzi">
       <ion-label>

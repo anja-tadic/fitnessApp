@@ -6,9 +6,10 @@ import {
   IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect, IonSelectOption
 } from '@ionic/angular/standalone';
 import { Firestore, collection, collectionData, doc, deleteDoc, query, where } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
 import { AuthService } from '../../../services/auth';
 import { addIcons } from 'ionicons';
-import { addOutline, trashOutline } from 'ionicons/icons';
+import { addOutline, trashOutline, logOutOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 
 @Component({
@@ -35,12 +36,11 @@ export class TreneriPage implements OnInit {
     gender: ''
   };
 
-  constructor(private firestore: Firestore, private authService: AuthService, private router: Router) {
-    addIcons({ addOutline, trashOutline });
+  constructor(private firestore: Firestore, private auth: Auth, private authService: AuthService, private router: Router) {
+    addIcons({ addOutline, trashOutline, logOutOutline });
   }
 
   ngOnInit() {
-    // Učitavamo samo korisnike sa ulogom 'zaposleni'
     const ref = collection(this.firestore, 'users');
     const q = query(ref, where('role', '==', 'zaposleni'));
     collectionData(q, { idField: 'uid' }).subscribe(data => {
@@ -54,13 +54,11 @@ export class TreneriPage implements OnInit {
 
   zatvoriFormu() {
     this.prikaziFormu = false;
-    // Resetujemo formu
     this.noviTrener = { name: '', email: '', password: '', phone: '', gender: '' };
   }
 
   async dodajTrenera() {
-    // Provera da li su sva polja popunjena
-   if (!this.noviTrener.name || !this.noviTrener.email || !this.noviTrener.password) {
+    if (!this.noviTrener.name || !this.noviTrener.email || !this.noviTrener.password) {
       alert('Ime, email i lozinka su obavezni!');
       return;
     }
@@ -71,7 +69,6 @@ export class TreneriPage implements OnInit {
     }
 
     try {
-      // Koristimo isti register metod iz AuthService, samo sa ulogom 'zaposleni'
       await this.authService.register(
         this.noviTrener.email,
         this.noviTrener.password,
@@ -82,8 +79,7 @@ export class TreneriPage implements OnInit {
       );
       alert('Trener uspešno dodat!');
       this.zatvoriFormu();
-  
-     } catch (error: any) {
+    } catch (error: any) {
       console.error('Greška:', error);
       if (error.code === 'auth/email-already-in-use') {
         alert('Korisnik sa ovim emailom već postoji!');
@@ -93,15 +89,20 @@ export class TreneriPage implements OnInit {
         alert('Greška pri dodavanju trenera!');
       }
     }
-    }
-  
+  }
 
   async obrisiTrenera(uid: string) {
     if (confirm('Da li ste sigurni da želite da obrišete ovog trenera?')) {
       await deleteDoc(doc(this.firestore, 'users', uid));
     }
   }
+
   otvoriProfil(uid: string) {
     this.router.navigate(['/admin/trener-detalji', uid]);
+  }
+
+  async logout() {
+    await this.auth.signOut();
+    this.router.navigate(['/login']);
   }
 }

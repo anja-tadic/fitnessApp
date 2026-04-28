@@ -1,37 +1,41 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonLabel, IonButton, IonBadge } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonLabel, IonButton, IonBadge, IonButtons } from '@ionic/angular/standalone';
 import { Firestore, collection, collectionData, doc, deleteDoc } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs'; // tip podataka koji se menja u realnom vremenu 
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-korisnici',
   templateUrl: './korisnici.page.html',
   styleUrls: ['./korisnici.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonLabel, IonButton, IonBadge, CommonModule]
+  imports: [IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonLabel, IonButton, IonBadge, IonButtons, CommonModule]
 })
-export class KorisniciPage implements OnInit { // implementiramo onInit jer cemo koristiti tu metodu 
+export class KorisniciPage implements OnInit {
 
-  korisnici$!: Observable<any[]>; // deklarisemo promenljivu $-observable, !-nije undefined
+  korisnici$!: Observable<any[]>;
 
-  constructor(private firestore: Firestore, private router: Router) {} // angular automatski ubacuje firestore i router servise
+  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {}
 
-  ngOnInit() { // metoda se izvrsava cim se ucita stranica
-    // Učitavamo sve korisnike iz baze — lista se automatski osvežava
-    const korisniciRef = collection(this.firestore, 'users'); // uzima referencu ka kolekciji users iz baze
+  ngOnInit() {
+    const korisniciRef = collection(this.firestore, 'users');
     this.korisnici$ = collectionData(korisniciRef, { idField: 'id' });
   }
 
-  // Navigacija na profil korisnika
   otvoriProfil(uid: string) {
-    this.router.navigate(['/admin/korisnik-detalji', uid]); // navigira na stranicu detalja i salje uid korisnika
+    this.router.navigate(['/admin/korisnik-detalji', uid]);
   }
 
   async obrisiKorisnika(uid: string) {
     if (confirm('Da li ste sigurni?')) {
-      await deleteDoc(doc(this.firestore, 'users', uid)); // brisanje iz baze
+      await deleteDoc(doc(this.firestore, 'users', uid));
     }
+  }
+
+  async logout() {
+    await this.auth.signOut();
+    this.router.navigate(['/login']);
   }
 }

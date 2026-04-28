@@ -7,8 +7,10 @@ import {
   IonSelectOption, IonDatetime, IonDatetimeButton, IonModal
 } from '@ionic/angular/standalone';
 import { Firestore, collection, collectionData, addDoc, deleteDoc, doc, query, where } from '@angular/fire/firestore';
+import { Auth } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { addOutline, trashOutline } from 'ionicons/icons';
+import { addOutline, trashOutline, logOutOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-treninzi',
@@ -38,8 +40,8 @@ export class TreninziPage implements OnInit {
     prijavljeni: 0
   };
 
-  constructor(private firestore: Firestore) {
-    addIcons({ addOutline, trashOutline });
+  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
+    addIcons({ addOutline, trashOutline, logOutOutline });
   }
 
   ngOnInit() {
@@ -50,7 +52,6 @@ export class TreninziPage implements OnInit {
   ucitajTreninge() {
     const ref = collection(this.firestore, 'treninzi');
     collectionData(ref, { idField: 'id' }).subscribe(data => {
-      // Sortiramo po datumu - najpre nadolazeci treninzi
       this.treninzi = data.sort((a: any, b: any) =>
         new Date(a.datum).getTime() - new Date(b.datum).getTime()
       );
@@ -58,7 +59,6 @@ export class TreninziPage implements OnInit {
   }
 
   ucitajTrenere() {
-    // Ucitavamo sve zaposlene da ih ponudimo kao izbor
     const ref = collection(this.firestore, 'users');
     const q = query(ref, where('role', '==', 'zaposleni'));
     collectionData(q, { idField: 'uid' }).subscribe(data => {
@@ -88,7 +88,6 @@ export class TreninziPage implements OnInit {
       return;
     }
 
-    // Pronalazimo ime trenera na osnovu uid-a
     const trener = this.treneri.find(t => t.uid === this.noviTrening.trenerUid);
     this.noviTrening.trenerIme = trener ? trener.name : '';
 
@@ -113,5 +112,10 @@ export class TreninziPage implements OnInit {
     if (confirm('Da li ste sigurni da želite da obrišete ovaj trening?')) {
       await deleteDoc(doc(this.firestore, 'treninzi', id));
     }
+  }
+
+  async logout() {
+    await this.auth.signOut();
+    this.router.navigate(['/login']);
   }
 }

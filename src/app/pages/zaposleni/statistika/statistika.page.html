@@ -1,6 +1,11 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Train Club</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="logout-btn" (click)="logout()">
+        Odjavi se
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -18,7 +23,6 @@
 
     <h1 class="title">Statistika dolazaka</h1>
 
-    <!-- Kartice sa brojevima -->
     <div class="stats-row">
       <ion-card class="stat-card">
         <ion-card-content>
@@ -37,7 +41,6 @@
       </ion-card>
     </div>
 
-    <!-- Lista dolazaka -->
     <h2 class="lista-title">Istorija dolazaka</h2>
 
     <ion-card class="dolazak-card" *ngFor="let p of prisustva">
