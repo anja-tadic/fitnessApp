@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
-import { Firestore, collection, addDoc, doc, getDoc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Html5Qrcode } from 'html5-qrcode';
 import { addIcons } from 'ionicons';
@@ -53,7 +53,6 @@ export class QrSkenerPage implements OnInit, OnDestroy {
 
   async zabeleziPrisustvo(uid: string) {
     try {
-      // Provjeri da li korisnik postoji
       const userRef = doc(this.firestore, 'users', uid);
       const userSnap = await getDoc(userRef);
 
@@ -65,7 +64,26 @@ export class QrSkenerPage implements OnInit, OnDestroy {
 
       const korisnik = userSnap.data();
 
-      // Zabeleži prisustvo u Firestore
+      // Provjeri da li je korisnik vec skeniran danas
+      const danas = new Date();
+      const pocetak = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate()).toISOString();
+      const kraj = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate() + 1).toISOString();
+
+      const prisustvoRef = collection(this.firestore, 'prisustvo');
+      const q = query(prisustvoRef,
+        where('uid', '==', uid),
+        where('datum', '>=', pocetak),
+        where('datum', '<', kraj)
+      );
+      const querySnap = await getDocs(q);
+
+      if (!querySnap.empty) {
+        this.poruka = `${korisnik['name']} je već skeniran danas!`;
+        this.greska = true;
+        return;
+      }
+
+      // Zabeleži prisustvo
       await addDoc(collection(this.firestore, 'prisustvo'), {
         uid: uid,
         ime: korisnik['name'],
@@ -73,7 +91,7 @@ export class QrSkenerPage implements OnInit, OnDestroy {
         trener: this.auth.currentUser?.uid
       });
 
-      this.poruka = `Prisustvo zabilježeno za: ${korisnik['name']}`;
+      this.poruka = `Prisustvo zabeleženo za: ${korisnik['name']}`;
       this.greska = false;
 
     } catch (error) {
