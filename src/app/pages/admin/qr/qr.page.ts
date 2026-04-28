@@ -1,20 +1,77 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, IonCard, IonCardContent } from '@ionic/angular/standalone';
+import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { Html5Qrcode } from 'html5-qrcode';
+import { addIcons } from 'ionicons';
+import { qrCodeOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-qr',
   templateUrl: './qr.page.html',
   styleUrls: ['./qr.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, IonCard, IonCardContent, CommonModule]
 })
-export class QrPage implements OnInit {
+export class QrPage implements OnInit, OnDestroy {
 
-  constructor() { }
+  html5QrCode: Html5Qrcode | null = null;
+  skeniranje: boolean = false;
+  korisnik: any = null;
+  validan: boolean = false;
+  nevalidan: boolean = false;
 
-  ngOnInit() {
+  constructor(private firestore: Firestore) {
+    addIcons({ qrCodeOutline, checkmarkCircleOutline, closeCircleOutline });
   }
 
+  ngOnInit() {}
+
+  async startSkeniranje() {
+    this.korisnik = null;
+    this.validan = false;
+    this.nevalidan = false;
+    this.html5QrCode = new Html5Qrcode('qr-reader-admin');
+    this.skeniranje = true;
+
+    await this.html5QrCode.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      async (decodedText) => {
+        await this.stopSkeniranje();
+        await this.provjeriQR(decodedText);
+      },
+      (error) => {}
+    );
+  }
+
+  async stopSkeniranje() {
+    if (this.html5QrCode && this.skeniranje) {
+      await this.html5QrCode.stop();
+      this.skeniranje = false;
+    }
+  }
+
+  async provjeriQR(uid: string) {
+    try {
+      const userRef = doc(this.firestore, 'users', uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        this.korisnik = userSnap.data();
+        this.validan = true;
+        this.nevalidan = false;
+      } else {
+        this.korisnik = null;
+        this.validan = false;
+        this.nevalidan = true;
+      }
+    } catch (error) {
+      this.nevalidan = true;
+    }
+  }
+
+  ngOnDestroy() {
+    this.stopSkeniranje();
+  }
 }

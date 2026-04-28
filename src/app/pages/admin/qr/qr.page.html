@@ -1,13 +1,61 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>qr</ion-title>
+    <ion-title>Train Club</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">qr</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <div class="background-glow"></div>
+
+  <div class="qr-container">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
+      <rect x="10" y="45" width="80" height="10" rx="5" fill="#8B5CF6"/>
+      <rect x="10" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
+      <rect x="75" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
+      <rect x="2" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
+      <rect x="88" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
+    </svg>
+
+    <h1 class="title">Provera QR Koda</h1>
+    <p class="subtitle">Skenirajte QR kod klijenta</p>
+
+    <div id="qr-reader-admin" class="qr-reader-box"></div>
+
+    <ion-button *ngIf="!skeniranje" expand="block" class="skener-btn" (click)="startSkeniranje()">
+      Pokreni skener
+    </ion-button>
+
+    <ion-button *ngIf="skeniranje" expand="block" fill="outline" class="stop-btn" (click)="stopSkeniranje()">
+      Zaustavi skener
+    </ion-button>
+
+    <!-- Validan QR kod -->
+    <ion-card class="rezultat-card validan-card" *ngIf="validan && korisnik">
+      <ion-card-content>
+        <div class="rezultat-header">
+          <ion-icon name="checkmark-circle-outline" class="validan-icon"></ion-icon>
+          <h2>QR Kod je autentičan ✅</h2>
+        </div>
+        <div class="korisnik-info">
+          <p><strong>Ime:</strong> {{ korisnik.name }}</p>
+          <p><strong>Email:</strong> {{ korisnik.email }}</p>
+          <p><strong>Rola:</strong> {{ korisnik.role }}</p>
+          <p><strong>Pol:</strong> {{ korisnik.gender }}</p>
+          <p><strong>Telefon:</strong> {{ korisnik.phone }}</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Nevalidan QR kod -->
+    <ion-card class="rezultat-card nevalidan-card" *ngIf="nevalidan">
+      <ion-card-content>
+        <div class="rezultat-header">
+          <ion-icon name="close-circle-outline" class="nevalidan-icon"></ion-icon>
+          <h2>QR Kod nije validan ❌</h2>
+        </div>
+        <p>Ovaj QR kod ne postoji u sistemu.</p>
+      </ion-card-content>
+    </ion-card>
+
+  </div>
 </ion-content>
