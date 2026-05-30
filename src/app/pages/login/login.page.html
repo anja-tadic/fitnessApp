@@ -1,42 +1,55 @@
 <ion-header class="ion-no-border">
-  <ion-toolbar>
-  </ion-toolbar>
+  <ion-toolbar></ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
 
-  <div class="background-glow"></div>
-
   <div class="logo-container">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="70" height="70">
-      <rect x="10" y="45" width="80" height="10" rx="5" fill="#8B5CF6"/>
-      <rect x="10" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
-      <rect x="75" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
-      <rect x="2" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
-      <rect x="88" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
-    </svg>
-    <h1 class="app-title">Train Club</h1>
+    <div class="logo-icon">
+      <ion-icon name="barbell"></ion-icon>
+    </div>
+    <h1 class="app-title">TRAIN<span>CLUB</span></h1>
     <p class="app-subtitle">Dobrodošli nazad!</p>
   </div>
 
   <div class="form-container">
+
+    <p class="input-label">Email</p>
     <ion-item class="custom-item">
-      <ion-label position="floating">Email</ion-label>
-      <ion-input type="email" [(ngModel)]="email"></ion-input>
+      <ion-icon name="mail-outline" slot="start" color="medium"></ion-icon>
+      <ion-input
+        type="email"
+        [(ngModel)]="email"
+        placeholder="vas@email.com">
+      </ion-input>
     </ion-item>
 
+    <p class="input-label">Lozinka</p>
     <ion-item class="custom-item">
-      <ion-label position="floating">Lozinka</ion-label>
-      <ion-input type="password" [(ngModel)]="password"></ion-input>
+      <ion-icon name="lock-closed-outline" slot="start" color="medium"></ion-icon>
+      <ion-input
+        type="password"
+        [(ngModel)]="password"
+        placeholder="••••••••">
+        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+      </ion-input>
     </ion-item>
 
     <ion-button expand="block" class="login-btn" (click)="login()">
-      Prijavi se →
+      Prijavi se!
+      <ion-icon name="arrow-forward" slot="end"></ion-icon>
     </ion-button>
 
-    <ion-button expand="block" fill="clear" class="register-link" (click)="goToRegister()">
-      Nemate nalog? Registrujte se
+    <div class="divider">
+      <div class="line"></div>
+      <span>ili</span>
+      <div class="line"></div>
+    </div>
+
+    <ion-button expand="block" class="register-link" (click)="goToRegister()">
+      Nemate nalog? <span class="accent">&nbsp;Registrujte se!</span>
     </ion-button>
+
   </div>
 
 </ion-content>

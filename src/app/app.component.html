@@ -1,3 +1,91 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+
+  <ion-menu side="start" contentId="main">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Fitness App</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list lines="none">
+
+        @if (role === 'admin') {
+          <ion-menu-toggle>
+            <ion-item routerLink="/admin/korisnici">
+              <ion-icon name="people" slot="start"></ion-icon>
+              <ion-label>Korisnici</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle>
+            <ion-item routerLink="/admin/treneri">
+              <ion-icon name="barbell" slot="start"></ion-icon>
+              <ion-label>Treneri</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle>
+            <ion-item routerLink="/admin/treninzi">
+              <ion-icon name="calendar" slot="start"></ion-icon>
+              <ion-label>Treninzi</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle>
+            <ion-item routerLink="/admin/qr">
+              <ion-icon name="qr-code" slot="start"></ion-icon>
+              <ion-label>QR Provera</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+       @if (role === 'zaposleni') {
+          <ion-menu-toggle>
+            <ion-item routerLink="/zaposleni/moji-treninzi">
+              <ion-icon name="barbell" slot="start"></ion-icon>
+              <ion-label>Moji treninzi</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle>
+            <ion-item routerLink="/zaposleni/statistika">
+              <ion-icon name="stats-chart" slot="start"></ion-icon>
+              <ion-label>Statistika</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+        @if (role === 'klijent') {
+          <ion-menu-toggle>
+            <ion-item routerLink="/klijent/treninzi">
+              <ion-icon name="barbell" slot="start"></ion-icon>
+              <ion-label>Treninzi</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle>
+            <ion-item routerLink="/klijent/moji-termini">
+              <ion-icon name="calendar" slot="start"></ion-icon>
+              <ion-label>Moji termini</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle>
+            <ion-item routerLink="/klijent/qr-kod">
+              <ion-icon name="qr-code" slot="start"></ion-icon>
+              <ion-label>Moj QR kod</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+        @if (role !== '') {
+          <ion-menu-toggle>
+            <ion-item (click)="onLogOut()">
+              <ion-icon name="log-out" slot="start"></ion-icon>
+              <ion-label>Odjavi se</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main"></ion-router-outlet>
+
 </ion-app>

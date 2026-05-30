@@ -7,7 +7,7 @@ import {
 } from '@ionic/angular/standalone';
 import { Firestore, collection, collectionData, doc, deleteDoc, query, where } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { AuthService } from '../../../services/auth';
+import { AuthService } from '../../../services/auth.service';
 import { addIcons } from 'ionicons';
 import { addOutline, trashOutline, logOutOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';

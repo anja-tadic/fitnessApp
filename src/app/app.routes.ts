@@ -62,10 +62,7 @@ export const routes: Routes = [
         path: 'moji-treninzi',
         loadComponent: () => import('./pages/zaposleni/moji-treninzi/moji-treninzi.page').then(m => m.MojiTreninziPage)
       },
-      {
-        path: 'qr-skener',
-        loadComponent: () => import('./pages/zaposleni/qr-skener/qr-skener.page').then(m => m.QrSkenerPage)
-      },
+      
       {
         path: 'statistika',
         loadComponent: () => import('./pages/zaposleni/statistika/statistika.page').then(m => m.StatistikaPage)
@@ -77,24 +74,30 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'klijent',
-    loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage)
-  },
-  {
-    path: 'treninzi',
-    loadComponent: () => import('./pages/klijent/treninzi/treninzi.page').then( m => m.TreninziPage)
-  },
-  {
-    path: 'moji-termini',
-    loadComponent: () => import('./pages/klijent/moji-termini/moji-termini.page').then( m => m.MojiTerminiPage)
-  },
-  {
-    path: 'qr-kod',
-    loadComponent: () => import('./pages/klijent/qr-kod/qr-kod.page').then( m => m.QrKodPage)
-  },
- {
-    path: 'trening-info/:id',
-    loadComponent: () => import('./pages/klijent/trening-info/trening-info.page').then( m => m.TreningInfoPage)
+    path: 'klijent',                                                              // ✅ klijent je parent
+    loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage),
+    children: [                                                                   // ✅ sve klijent rute su children
+      {
+        path: '',
+        redirectTo: 'treninzi',                                                   // ✅ default stranica
+        pathMatch: 'full'
+      },
+      {
+        path: 'treninzi',
+        loadComponent: () => import('./pages/klijent/treninzi/treninzi.page').then(m => m.TreninziPage)
+      },
+      {
+        path: 'moji-termini',
+        loadComponent: () => import('./pages/klijent/moji-termini/moji-termini.page').then(m => m.MojiTerminiPage)
+      },
+      {
+        path: 'qr-kod',
+        loadComponent: () => import('./pages/klijent/qr-kod/qr-kod.page').then(m => m.QrKodPage)
+      },
+      {
+        path: 'trening-info/:id',
+        loadComponent: () => import('./pages/klijent/trening-info/trening-info.page').then(m => m.TreningInfoPage)
+      }
+    ]
   }
-
 ];

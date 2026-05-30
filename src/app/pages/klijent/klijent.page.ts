@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButtons, IonButton, IonIcon, IonCard, IonCardContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../services/auth.service';
 import { addIcons } from 'ionicons';
 import { fitnessOutline, calendarOutline, qrCodeOutline, logOutOutline } from 'ionicons/icons';
 
