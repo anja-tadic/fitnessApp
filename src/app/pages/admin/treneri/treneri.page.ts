@@ -1,15 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
-  IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect, IonSelectOption
+  IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect, 
+  IonSelectOption, IonSearchbar, AlertController
 } from '@ionic/angular/standalone';
-import { Firestore, collection, collectionData, doc, deleteDoc, query, where } from '@angular/fire/firestore';
-import { Auth } from '@angular/fire/auth';
 import { AuthService } from '../../../services/auth.service';
 import { addIcons } from 'ionicons';
-import { addOutline, trashOutline, logOutOutline } from 'ionicons/icons';
+import { addOutline, trashOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 
 @Component({
@@ -20,12 +19,17 @@ import { Router } from '@angular/router';
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
     IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect,
-    IonSelectOption, CommonModule, FormsModule
+    IonSelectOption, IonSearchbar, CommonModule, FormsModule
   ]
 })
 export class TreneriPage implements OnInit {
 
-  treneri: any[] = [];
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private alertCtrl = inject(AlertController);
+
+  treneri: any[] = [];        // svi treneri iz baze
+  filtrirani: any[] = [];     // treneri koji se prikazuju nakon pretrage
   prikaziFormu: boolean = false;
 
   noviTrener = {
@@ -36,16 +40,24 @@ export class TreneriPage implements OnInit {
     gender: ''
   };
 
-  constructor(private firestore: Firestore, private auth: Auth, private authService: AuthService, private router: Router) {
-    addIcons({ addOutline, trashOutline, logOutOutline });
+  constructor() {
+    addIcons({ addOutline, trashOutline });
   }
 
   ngOnInit() {
-    const ref = collection(this.firestore, 'users');
-    const q = query(ref, where('role', '==', 'zaposleni'));
-    collectionData(q, { idField: 'uid' }).subscribe(data => {
-      this.treneri = data;
+    this.authService.getTreneri().subscribe(data => {
+      this.treneri = data;      // čuvamo sve
+      this.filtrirani = data;   // na početku prikazujemo sve
     });
+  }
+
+  pretrazi(event: any) {
+    const termin = event.detail.value?.toLowerCase() || '';
+    this.filtrirani = this.treneri.filter(t =>
+      t.name?.toLowerCase().includes(termin) ||
+      t.email?.toLowerCase().includes(termin) ||
+      t.phone?.toLowerCase().includes(termin)
+    );
   }
 
   otvoriFormu() {
@@ -59,12 +71,12 @@ export class TreneriPage implements OnInit {
 
   async dodajTrenera() {
     if (!this.noviTrener.name || !this.noviTrener.email || !this.noviTrener.password) {
-      alert('Ime, email i lozinka su obavezni!');
-      return;
-    }
-
-    if (!this.noviTrener.email.endsWith('@trener.com')) {
-      alert('Email trenera mora biti u formatu: ime@trener.com');
+      const alert = await this.alertCtrl.create({
+        header: 'Greška',
+        message: 'Ime, email i lozinka su obavezni!',
+        buttons: ['OK']
+      });
+      await alert.present();
       return;
     }
 
@@ -77,32 +89,47 @@ export class TreneriPage implements OnInit {
         this.noviTrener.gender,
         this.noviTrener.phone
       );
-      alert('Trener uspešno dodat!');
-      this.zatvoriFormu();
+
+      const alert = await this.alertCtrl.create({
+        header: 'Uspeh',
+        message: 'Trener uspešno dodat!',
+        buttons: [{ text: 'OK', handler: () => this.zatvoriFormu() }]
+      });
+      await alert.present();
+
     } catch (error: any) {
-      console.error('Greška:', error);
-      if (error.code === 'auth/email-already-in-use') {
-        alert('Korisnik sa ovim emailom već postoji!');
-      } else if (error.code === 'auth/weak-password') {
-        alert('Lozinka mora imati najmanje 6 karaktera!');
-      } else {
-        alert('Greška pri dodavanju trenera!');
-      }
+      let poruka = 'Greška pri dodavanju trenera!';
+      if (error.code === 'auth/email-already-in-use') poruka = 'Korisnik sa ovim emailom već postoji!';
+      if (error.code === 'auth/weak-password') poruka = 'Lozinka mora imati najmanje 6 karaktera!';
+
+      const alert = await this.alertCtrl.create({
+        header: 'Greška',
+        message: poruka,
+        buttons: ['OK']
+      });
+      await alert.present();
     }
   }
 
   async obrisiTrenera(uid: string) {
-    if (confirm('Da li ste sigurni da želite da obrišete ovog trenera?')) {
-      await deleteDoc(doc(this.firestore, 'users', uid));
-    }
+    const alert = await this.alertCtrl.create({
+      header: 'Brisanje trenera',
+      message: 'Da li ste sigurni da želite da obrišete ovog trenera?',
+      buttons: [
+        { text: 'Otkaži', role: 'cancel' },
+        {
+          text: 'Obriši',
+          role: 'destructive',
+          handler: async () => {
+            await this.authService.deleteUser(uid); // brisanje kroz servis
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   otvoriProfil(uid: string) {
     this.router.navigate(['/admin/trener-detalji', uid]);
-  }
-
-  async logout() {
-    await this.auth.signOut();
-    this.router.navigate(['/login']);
   }
 }

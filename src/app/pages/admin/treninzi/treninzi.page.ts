@@ -1,16 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
   IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect,
-  IonSelectOption, IonDatetime, IonDatetimeButton, IonModal
+  IonSelectOption, IonDatetime, IonDatetimeButton, IonModal, AlertController
 } from '@ionic/angular/standalone';
-import { Firestore, collection, collectionData, addDoc, deleteDoc, doc, query, where } from '@angular/fire/firestore';
-import { Auth } from '@angular/fire/auth';
-import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { addOutline, trashOutline, logOutOutline } from 'ionicons/icons';
+import { addOutline, trashOutline } from 'ionicons/icons';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-treninzi',
@@ -26,6 +24,9 @@ import { addOutline, trashOutline, logOutOutline } from 'ionicons/icons';
 })
 export class TreninziPage implements OnInit {
 
+  private authService = inject(AuthService);
+  private alertCtrl = inject(AlertController);
+
   treninzi: any[] = [];
   treneri: any[] = [];
   prikaziFormu: boolean = false;
@@ -40,28 +41,20 @@ export class TreninziPage implements OnInit {
     prijavljeni: 0
   };
 
-  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
-    addIcons({ addOutline, trashOutline, logOutOutline });
+  constructor() {
+    addIcons({ addOutline, trashOutline });
   }
 
   ngOnInit() {
-    this.ucitajTreninge();
-    this.ucitajTrenere();
-  }
-
-  ucitajTreninge() {
-    const ref = collection(this.firestore, 'treninzi');
-    collectionData(ref, { idField: 'id' }).subscribe(data => {
+    // dohvatamo treninge iz servisa i sortiramo po datumu
+    this.authService.getTreninzi().subscribe(data => {
       this.treninzi = data.sort((a: any, b: any) =>
         new Date(a.datum).getTime() - new Date(b.datum).getTime()
       );
     });
-  }
 
-  ucitajTrenere() {
-    const ref = collection(this.firestore, 'users');
-    const q = query(ref, where('role', '==', 'zaposleni'));
-    collectionData(q, { idField: 'uid' }).subscribe(data => {
+    // dohvatamo trenere iz servisa
+    this.authService.getTreneri().subscribe(data => {
       this.treneri = data;
     });
   }
@@ -84,7 +77,12 @@ export class TreninziPage implements OnInit {
 
   async dodajTrening() {
     if (!this.noviTrening.naziv || !this.noviTrening.trenerUid) {
-      alert('Naziv i trener su obavezni!');
+      const alert = await this.alertCtrl.create({
+        header: 'Greška',
+        message: 'Naziv i trener su obavezni!',
+        buttons: ['OK']
+      });
+      await alert.present();
       return;
     }
 
@@ -92,7 +90,7 @@ export class TreninziPage implements OnInit {
     this.noviTrening.trenerIme = trener ? trener.name : '';
 
     try {
-      await addDoc(collection(this.firestore, 'treninzi'), {
+      await this.authService.dodajTrening({
         naziv: this.noviTrening.naziv,
         trenerUid: this.noviTrening.trenerUid,
         trenerIme: this.noviTrening.trenerIme,
@@ -100,22 +98,39 @@ export class TreninziPage implements OnInit {
         kapacitet: Number(this.noviTrening.kapacitet),
         prijavljeni: 0
       });
-      alert('Trening uspešno dodat!');
-      this.zatvoriFormu();
+
+      const alert = await this.alertCtrl.create({
+        header: 'Uspeh',
+        message: 'Trening uspešno dodat!',
+        buttons: [{ text: 'OK', handler: () => this.zatvoriFormu() }]
+      });
+      await alert.present();
+
     } catch (error) {
-      console.error('Greška:', error);
-      alert('Greška pri dodavanju treninga!');
+      const alert = await this.alertCtrl.create({
+        header: 'Greška',
+        message: 'Greška pri dodavanju treninga!',
+        buttons: ['OK']
+      });
+      await alert.present();
     }
   }
 
   async obrisiTrening(id: string) {
-    if (confirm('Da li ste sigurni da želite da obrišete ovaj trening?')) {
-      await deleteDoc(doc(this.firestore, 'treninzi', id));
-    }
-  }
-
-  async logout() {
-    await this.auth.signOut();
-    this.router.navigate(['/login']);
+    const alert = await this.alertCtrl.create({
+      header: 'Brisanje treninga',
+      message: 'Da li ste sigurni da želite da obrišete ovaj trening?',
+      buttons: [
+        { text: 'Otkaži', role: 'cancel' },
+        {
+          text: 'Obriši',
+          role: 'destructive',
+          handler: async () => {
+            await this.authService.obrisiTrening(id);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 }

@@ -74,12 +74,12 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'klijent',                                                              // ✅ klijent je parent
+    path: 'klijent',                                                              
     loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage),
-    children: [                                                                   // ✅ sve klijent rute su children
+    children: [                                                                   
       {
         path: '',
-        redirectTo: 'treninzi',                                                   // ✅ default stranica
+        redirectTo: 'treninzi',                                                  
         pathMatch: 'full'
       },
       {

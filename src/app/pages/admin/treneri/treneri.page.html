@@ -5,15 +5,20 @@
       <ion-button class="dodaj-btn" (click)="otvoriFormu()">
         + Dodaj trenera
       </ion-button>
-      <ion-button class="logout-btn" (click)="logout()">
-        Odjavi se
-      </ion-button>
     </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="!prikaziFormu">
+    <ion-searchbar
+      placeholder="Pretraži po imenu, emailu, telefonu..."
+      (ionInput)="pretrazi($event)"
+      animated>
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
 
+  <!-- Forma za dodavanje -->
   <div *ngIf="prikaziFormu" class="forma-kontejner">
     <ion-item>
       <ion-label position="floating">Ime i prezime</ion-label>
@@ -47,21 +52,26 @@
     </ion-button>
   </div>
 
+  <!-- Lista trenera -->
   <ion-list *ngIf="!prikaziFormu">
-    <ion-item *ngFor="let trener of treneri" button detail (click)="otvoriProfil(trener.uid)">
+    <ion-item *ngFor="let trener of filtrirani" button detail (click)="otvoriProfil(trener.uid)">
       <ion-label>
         <h2>{{ trener.name }}</h2>
         <p>{{ trener.email }}</p>
         <p>{{ trener.phone }}</p>
       </ion-label>
-      <ion-button slot="end" fill="clear" color="danger" (click)="obrisiTrenera(trener.uid)">
+      <ion-button 
+        slot="end" 
+        fill="clear" 
+        color="danger" 
+        (click)="$event.stopPropagation(); obrisiTrenera(trener.uid)">
         <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-item>
 
-    <ion-item *ngIf="treneri.length === 0">
+    <ion-item *ngIf="filtrirani.length === 0">
       <ion-label class="ion-text-center">
-        <p>Nema trenera. Dodajte prvog trenera.</p>
+        <p>Nema trenera.</p>
       </ion-label>
     </ion-item>
   </ion-list>

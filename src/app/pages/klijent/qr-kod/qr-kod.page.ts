@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, IonBackButton } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { AuthService } from '../../../services/auth.service';
 import QRCode from 'qrcode';
 import { addIcons } from 'ionicons';
 import { arrowBackOutline } from 'ionicons/icons';
@@ -13,26 +13,31 @@ import { arrowBackOutline } from 'ionicons/icons';
   templateUrl: './qr-kod.page.html',
   styleUrls: ['./qr-kod.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, CommonModule]
+  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, CommonModule, IonBackButton]
 })
 export class QrKodPage implements OnInit {
+
+  private auth = inject(Auth);           // potreban za currentUser
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   qrCodeUrl: string = '';
   korisnikIme: string = '';
 
-  constructor(private auth: Auth, private firestore: Firestore, private router: Router) {
+  constructor() {
     addIcons({ arrowBackOutline });
   }
 
   async ngOnInit() {
     this.auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const docRef = doc(this.firestore, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          this.korisnikIme = docSnap.data()['name'];
+        // dohvatamo ime korisnika kroz servis
+        const korisnik = await this.authService.getUserById(user.uid);
+        if (korisnik) {
+          this.korisnikIme = korisnik['name'];
         }
 
+        // generisemo QR kod sa uid-om korisnika
         this.qrCodeUrl = await QRCode.toDataURL(user.uid, {
           width: 250,
           margin: 2,
@@ -47,7 +52,5 @@ export class QrKodPage implements OnInit {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/klijent']);
-  }
+ 
 }

@@ -1,17 +1,23 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Korisnici</ion-title>
-    <ion-buttons slot="end">
-      <ion-button class="logout-btn" (click)="logout()">
-        Odjavi se
-      </ion-button>
-    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      placeholder="Pretraži po imenu, emailu, ulozi..."
+      (ionInput)="pretrazi($event)"
+      animated>
+    </ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-list>
-    <ion-item *ngFor="let korisnik of korisnici$ | async" (click)="otvoriProfil(korisnik.uid)" button detail>
+    <ion-item
+      *ngFor="let korisnik of filtrirani"
+      (click)="otvoriProfil(korisnik.uid)"
+      button
+      detail>
       <ion-label>
         <h2>{{ korisnik.name }}</h2>
         <p>{{ korisnik.email }}</p>
@@ -19,7 +25,12 @@
       <ion-badge slot="end" [color]="korisnik.role === 'admin' ? 'danger' : korisnik.role === 'zaposleni' ? 'warning' : 'primary'">
         {{ korisnik.role }}
       </ion-badge>
-      <ion-button slot="end" fill="clear" color="danger" (click)="$event.stopPropagation(); obrisiKorisnika(korisnik.uid)" *ngIf="korisnik.role !== 'admin'">
+      <ion-button
+        slot="end"
+        fill="clear"
+        color="danger"
+        (click)="$event.stopPropagation(); obrisiKorisnika(korisnik.uid)"
+        *ngIf="korisnik.role !== 'admin'">
         Obriši
       </ion-button>
     </ion-item>

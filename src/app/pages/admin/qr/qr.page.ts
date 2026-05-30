@@ -1,12 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, IonCard, IonCardContent } from '@ionic/angular/standalone';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
-import { Auth } from '@angular/fire/auth';
-import { Router } from '@angular/router';
 import { Html5Qrcode } from 'html5-qrcode';
 import { addIcons } from 'ionicons';
-import { qrCodeOutline, checkmarkCircleOutline, closeCircleOutline, logOutOutline } from 'ionicons/icons';
+import { qrCodeOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-qr',
@@ -17,14 +15,16 @@ import { qrCodeOutline, checkmarkCircleOutline, closeCircleOutline, logOutOutlin
 })
 export class QrPage implements OnInit, OnDestroy {
 
+  private authService = inject(AuthService);
+
   html5QrCode: Html5Qrcode | null = null;
   skeniranje: boolean = false;
   korisnik: any = null;
   validan: boolean = false;
   nevalidan: boolean = false;
 
-  constructor(private firestore: Firestore, private auth: Auth, private router: Router) {
-    addIcons({ qrCodeOutline, checkmarkCircleOutline, closeCircleOutline, logOutOutline });
+  constructor() {
+    addIcons({ qrCodeOutline, checkmarkCircleOutline, closeCircleOutline });
   }
 
   ngOnInit() {}
@@ -41,9 +41,9 @@ export class QrPage implements OnInit, OnDestroy {
       { fps: 10, qrbox: { width: 250, height: 250 } },
       async (decodedText) => {
         await this.stopSkeniranje();
-        await this.provjeriQR(decodedText);
+        await this.proveriQR(decodedText);
       },
-      (error) => {}
+      (error) => {} // ignorisemo greske skeniranja
     );
   }
 
@@ -54,13 +54,11 @@ export class QrPage implements OnInit, OnDestroy {
     }
   }
 
-  async provjeriQR(uid: string) {
+  async proveriQR(uid: string) {
     try {
-      const userRef = doc(this.firestore, 'users', uid);
-      const userSnap = await getDoc(userRef);
-
-      if (userSnap.exists()) {
-        this.korisnik = userSnap.data();
+      const korisnik = await this.authService.getUserById(uid); // koristimo servis
+      if (korisnik) {
+        this.korisnik = korisnik;
         this.validan = true;
         this.nevalidan = false;
       } else {
@@ -71,11 +69,6 @@ export class QrPage implements OnInit, OnDestroy {
     } catch (error) {
       this.nevalidan = true;
     }
-  }
-
-  async logout() {
-    await this.auth.signOut();
-    this.router.navigate(['/login']);
   }
 
   ngOnDestroy() {

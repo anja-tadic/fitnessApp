@@ -1,64 +1,53 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonButton, IonBackButton, IonButtons } from '@ionic/angular/standalone';
-import { Firestore, collection, collectionData, query, where, getDocs, addDoc, updateDoc, doc, increment } from '@angular/fire/firestore';
-import { Auth } from '@angular/fire/auth';
+import {
+  IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
+  IonLabel, IonButton, IonButtons, IonBackButton, AlertController
+} from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
+import { Auth } from '@angular/fire/auth';
+import { AuthService } from '../../../services/auth.service';
+
 @Component({
   selector: 'app-treninzi',
   templateUrl: './treninzi.page.html',
   styleUrls: ['./treninzi.page.scss'],
   standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonButton, IonBackButton, IonButtons, CommonModule]
+  imports: [
+    IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
+    IonLabel, IonButton, IonButtons, IonBackButton, CommonModule
+  ]
 })
 export class TreninziPage implements OnInit {
 
-  treninzi: any[] = []; // lista svih dostupnih treninga
+  private authService = inject(AuthService);
+  private alertCtrl = inject(AlertController);
+  private router = inject(Router);
+  private auth = inject(Auth); // potreban za currentUser
 
-  constructor(
-    private firestore: Firestore,
-    private auth: Auth, // koristimo da znamo koji je klijent prijavljen
-     private router: Router,
-  ) {}
+  treninzi: any[] = [];
+  klijentUid: string = '';
 
   ngOnInit() {
-    // Cekamo da se korisnik ucita pa tek onda ucitavamo treninge
-    this.auth.onAuthStateChanged(user => {
+    // cekamo da se korisnik ucita
+    this.auth.onAuthStateChanged(async user => {
       if (user) {
-        this.ucitajTreninge(user.uid);
+        this.klijentUid = user.uid;
+        this.ucitajTreninge();
       }
     });
   }
 
-  async ucitajTreninge(klijentUid: string) {
-    // Ucitavamo sve treninge koji su u buducnosti
-    const ref = collection(this.firestore, 'treninzi');
-    
-    collectionData(ref, { idField: 'id' }).subscribe(async data => {
-      const sutra = new Date();
-      sutra.setDate(sutra.getDate() + 1); // klijent moze da se prijavi najranije 1 dan pre
+  async ucitajTreninge() {
+    // dohvatamo sve treninge
+    this.authService.getTreninzi().subscribe(async data => {
+      // za svaki trening proveravamo da li je klijent vec prijavljen
+      const treninziSaStatusom = await Promise.all(data.map(async trening => {
+        const prijavljen = await this.authService.jePrijavljen(this.klijentUid, trening.id);
+        return { ...trening, prijavljen };
+      }));
 
-      // Filtriramo treninge koji su bar sutra ili kasnije
-      const dostupni = data.filter((t: any) => new Date(t.datum) >= sutra);
-
-      // Za svaki trening proveravamo da li je klijent vec prijavljen
-      const treninziSaStatusom = await Promise.all(
-        dostupni.map(async (trening: any) => {
-          const prijaveRef = collection(this.firestore, 'prijave');
-          const q = query(
-            prijaveRef,
-            where('treningId', '==', trening.id),
-            where('klijentUid', '==', klijentUid)
-          );
-          const snapshot = await getDocs(q);
-          return {
-            ...trening,
-            prijavljen: !snapshot.empty // true ako je vec prijavljen
-          };
-        })
-      );
-
-      // Sortiramo po datumu
+      // sortiramo po datumu
       this.treninzi = treninziSaStatusom.sort((a: any, b: any) =>
         new Date(a.datum).getTime() - new Date(b.datum).getTime()
       );
@@ -66,44 +55,43 @@ export class TreninziPage implements OnInit {
   }
 
   async prijaviSe(trening: any) {
-    const user = this.auth.currentUser;
-    if (!user) return;
+    // provera — prijava najranije 1 dan pre termina
+    const treningVreme = new Date(trening.datum).getTime();
+    const sadasnjost = new Date().getTime();
+    const razlika = treningVreme - sadasnjost;
+    const jedanDan = 24 * 60 * 60 * 1000; // 1 dan u milisekundama
 
-    // Proveravamo da li je trening bar sutra
-    const sutra = new Date();
-    sutra.setDate(sutra.getDate() + 1);
-    if (new Date(trening.datum) < sutra) {
-      alert('Možete se prijaviti najranije 1 dan pre treninga!');
-      return;
-    }
-
-    // Proveravamo da li ima slobodnih mesta
-    if (trening.prijavljeni >= trening.kapacitet) {
-      alert('Trening je popunjen!');
+    if (razlika > jedanDan) {
+      const alert = await this.alertCtrl.create({
+        header: 'Prerano',
+        message: 'Možete se prijaviti najranije 1 dan pre termina!',
+        buttons: ['OK']
+      });
+      await alert.present();
       return;
     }
 
     try {
-      // Dodajemo prijavu u kolekciju prijave
-      await addDoc(collection(this.firestore, 'prijave'), {
-        treningId: trening.id,
-        klijentUid: user.uid,
-        datum: new Date().toISOString() // kada je prijava napravljena
+      await this.authService.prijaviNaTrening(this.klijentUid, trening.id);
+      const alert = await this.alertCtrl.create({
+        header: 'Uspeh',
+        message: 'Uspešno ste se prijavili na trening!',
+        buttons: ['OK']
       });
+      await alert.present();
+      this.ucitajTreninge(); // osvezavamo listu
 
-      // Povecavamo broj prijavljenih na treningu za 1
-      await updateDoc(doc(this.firestore, 'treninzi', trening.id), {
-        prijavljeni: increment(1)
-      });
-
-      alert('Uspešno ste se prijavili na trening!');
     } catch (error) {
-      console.error('Greška:', error);
-      alert('Greška pri prijavi!');
+      const alert = await this.alertCtrl.create({
+        header: 'Greška',
+        message: 'Greška pri prijavi na trening!',
+        buttons: ['OK']
+      });
+      await alert.present();
     }
   }
+
   otvoriDetalje(id: string) {
-    // Navigiramo na stranicu detalja i saljemo id treninga kroz rutu
-    this.router.navigate(['/trening-info', id]);
+    this.router.navigate(['/klijent/trening-info', id]);
   }
 }
