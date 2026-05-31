@@ -1,6 +1,15 @@
+ion-toolbar {
+  --background: transparent;
+}
+
+ion-content {
+  --background: #0d0d0d;
+}
+
+
 .dodaj-btn {
-  --color: #a78bfa;
-  border: 0.5px solid rgba(139, 92, 246, 0.6);
+  --color: #FF6B35;
+  border: 0.5px solid rgba(255, 107, 53, 0.6);
   border-radius: 20px;
   font-size: 13px;
   margin-right: 8px;

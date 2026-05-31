@@ -3,20 +3,7 @@ ion-toolbar {
 }
 
 ion-content {
-  --background: transparent;
-  background: radial-gradient(ellipse at top, #2d1b69 0%, #0f0a1e 60%) !important;
-}
-
-.background-glow {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+  --background: #0d0d0d;
 }
 
 .qr-container {
@@ -24,12 +11,26 @@ ion-content {
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
-  position: relative;
-  z-index: 1;
+}
+
+.logo-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #FF6B35, #FF8C42);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 32px;
+    color: #ffffff;
+  }
 }
 
 .title {
-  color: #8B5CF6;
+  color: #FF6B35;
   font-size: 26px;
   font-weight: 800;
   margin: 15px 0 5px 0;
@@ -46,7 +47,7 @@ ion-content {
 .qr-reader-box {
   width: 300px;
   min-height: 300px;
-  border: 2px solid rgba(139, 92, 246, 0.5);
+  border: 2px solid rgba(255, 107, 53, 0.5);
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -54,8 +55,8 @@ ion-content {
 
 .skener-btn {
   width: 100%;
-  --border-radius: 50px;
-  --background: #8B5CF6;
+  --border-radius: 14px;
+  --background: linear-gradient(135deg, #FF6B35, #FF8C42);
   --color: #ffffff;
   font-weight: 700;
   height: 54px;
@@ -64,9 +65,9 @@ ion-content {
 
 .stop-btn {
   width: 100%;
-  --border-radius: 50px;
-  --border-color: #8B5CF6;
-  --color: #8B5CF6;
+  --border-radius: 14px;
+  --border-color: #FF6B35;
+  --color: #FF6B35;
   font-weight: 700;
   height: 54px;
   font-size: 16px;
@@ -120,14 +121,14 @@ ion-content {
     opacity: 0.9;
 
     strong {
-      color: #8B5CF6;
+      color: #FF6B35;
     }
   }
 }
 
 .logout-btn {
-  --color: #a78bfa;
-  border: 0.5px solid rgba(139, 92, 246, 0.6);
+  --color: #FF6B35;
+  border: 0.5px solid rgba(255, 107, 53, 0.6);
   border-radius: 20px;
   font-size: 13px;
   margin-right: 8px;

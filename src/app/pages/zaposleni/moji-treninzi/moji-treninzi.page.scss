@@ -1,0 +1,25 @@
+ion-toolbar {
+  --background: transparent;
+}
+
+ion-content {
+  --background: #0d0d0d;
+}
+
+ion-item {
+  --background: #1a1a1a;
+  --border-radius: 12px;
+  --border-color: #2a2a2a;
+  margin-bottom: 8px;
+}
+
+ion-label {
+  h2 {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  p {
+    color: #888;
+  }
+}

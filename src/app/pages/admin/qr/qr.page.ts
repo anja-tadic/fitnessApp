@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonIcon, IonButtons, IonCard, IonCardContent } from '@ionic/angular/standalone';
 import { Html5Qrcode } from 'html5-qrcode';
 import { addIcons } from 'ionicons';
-import { qrCodeOutline, checkmarkCircleOutline, closeCircleOutline } from 'ionicons/icons';
+import { qrCodeOutline, checkmarkCircleOutline, closeCircleOutline, barbell } from 'ionicons/icons';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
@@ -25,7 +25,7 @@ export class QrPage implements OnInit, OnDestroy {
   poruka: string = '';
 
   constructor() {
-    addIcons({ qrCodeOutline, checkmarkCircleOutline, closeCircleOutline });
+    addIcons({ qrCodeOutline, checkmarkCircleOutline, closeCircleOutline, barbell});
   }
 
   ngOnInit() {}

@@ -216,7 +216,7 @@ async snimiPrisustvo(klijentUid: string): Promise<string> {
   const snapshot = await getDocs(q);
 
   if (snapshot.empty) {
-    return 'nema_treninga'; // nema treninga u ovom trenutku
+    return 'nema_treninga';
   }
 
   const treningDoc = snapshot.docs[0];
@@ -225,7 +225,7 @@ async snimiPrisustvo(klijentUid: string): Promise<string> {
   // proveravamo da li je klijent prijavljen na ovaj trening
   const prijavljen = await this.jePrijavljen(klijentUid, trening['id']);
   if (!prijavljen) {
-    return 'nije_prijavljen'; // klijent nije prijavljen na ovaj trening
+    return 'nije_prijavljen';
   }
 
   // proveravamo da li je vec evidentiran na ovom treningu
@@ -236,13 +236,17 @@ async snimiPrisustvo(klijentUid: string): Promise<string> {
   );
   const duplikatSnap = await getDocs(duplikatQ);
   if (!duplikatSnap.empty) {
-    return 'vec_evidentiran'; // vec skeniran
+    return 'vec_evidentiran';
   }
 
-  // snimamo prisustvo
+  // dohvati ime klijenta iz users kolekcije
+  const userSnap = await getDoc(doc(this.firestore, 'users', klijentUid));
+  const ime = userSnap.exists() ? userSnap.data()['name'] : 'Nepoznat';
+
+  // snimamo prisustvo sa imenom
   await addDoc(collection(this.firestore, 'prisustvo'), {
     klijentUid,
-    ime: '', // popunjava se ispod
+    ime: ime,
     treningId: trening['id'],
     treningNaziv: trening['naziv'],
     datum: new Date().toISOString()

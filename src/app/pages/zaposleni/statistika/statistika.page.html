@@ -5,45 +5,61 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div class="background-glow"></div>
-
   <div class="statistika-container">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
-      <rect x="10" y="45" width="80" height="10" rx="5" fill="#8B5CF6"/>
-      <rect x="10" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
-      <rect x="75" y="35" width="15" height="30" rx="7" fill="#8B5CF6"/>
-      <rect x="2" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
-      <rect x="88" y="40" width="10" height="20" rx="5" fill="#8B5CF6"/>
-    </svg>
 
     <h1 class="title">Statistika dolazaka</h1>
 
-    <div class="stats-row">
-      <ion-card class="stat-card">
+    <!-- Trenutni trening -->
+    @if (trenutniTrening) {
+      <ion-card class="trenutni-trening-card">
         <ion-card-content>
-          <ion-icon name="person-outline"></ion-icon>
-          <h2>{{ prijavljeni }}</h2>
-          <p>Prijavljeni</p>
+          <div class="trenutni-header">
+            <ion-icon name="barbell-outline"></ion-icon>
+            <div>
+              <h3>{{ trenutniTrening.naziv }}</h3>
+              <p>{{ trenutniTrening.datum | date:'dd.MM.yyyy HH:mm' }}</p>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <ion-icon name="person-outline"></ion-icon>
+                <h2>{{ prijavljeniNaTrening }}</h2>
+                <p>Prijavljeni</p>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <ion-icon name="qr-code-outline"></ion-icon>
+                <h2>{{ prisutniNaTrening }}</h2>
+                <p>Skenirali QR</p>
+              </ion-card-content>
+            </ion-card>
+
+            <ion-card class="stat-card">
+              <ion-card-content>
+                <ion-icon name="time-outline"></ion-icon>
+                <h2>{{ prijavljeniNaTrening - prisutniNaTrening }}</h2>
+                <p>Nisu došli</p>
+              </ion-card-content>
+            </ion-card>
+          </div>
         </ion-card-content>
       </ion-card>
+    }
 
-      <ion-card class="stat-card">
+    @if (!trenutniTrening) {
+      <ion-card class="nema-treninga-card">
         <ion-card-content>
-          <ion-icon name="qr-code-outline"></ion-icon>
-          <h2>{{ ukupno }}</h2>
-          <p>Skenirali QR</p>
+          <ion-icon name="time-outline"></ion-icon>
+          <p>Nema aktivnog treninga u ovom trenutku.</p>
         </ion-card-content>
       </ion-card>
+    }
 
-      <ion-card class="stat-card">
-        <ion-card-content>
-          <ion-icon name="calendar-outline"></ion-icon>
-          <h2>{{ danas }}</h2>
-          <p>Danas</p>
-        </ion-card-content>
-      </ion-card>
-    </div>
-
+    <!-- Istorija dolazaka -->
     <h2 class="lista-title">Istorija dolazaka</h2>
 
     <ion-card class="dolazak-card" *ngFor="let p of prisustva">
@@ -51,7 +67,7 @@
         <div class="dolazak-row">
           <ion-icon name="person-outline"></ion-icon>
           <div class="dolazak-info">
-            <h3>{{ p.ime }}</h3>
+            <h3>{{ p.treningNaziv }}</h3>
             <p>{{ p.datumFormatiran }}</p>
           </div>
         </div>

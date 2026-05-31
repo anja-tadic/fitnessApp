@@ -2,8 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonCard, IonCardContent, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { personOutline, calendarOutline, timeOutline, qrCodeOutline } from 'ionicons/icons';
+import { personOutline, calendarOutline, timeOutline, qrCodeOutline, barbellOutline } from 'ionicons/icons';
 import { AuthService } from '../../../services/auth.service';
+import { Auth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-statistika',
@@ -15,14 +16,18 @@ import { AuthService } from '../../../services/auth.service';
 export class StatistikaPage implements OnInit {
 
   private authService = inject(AuthService);
+  private auth = inject(Auth);
 
+  // Trenutni trening (±15 min)
+  trenutniTrening: any = null;
+  prijavljeniNaTrening: number = 0;
+  prisutniNaTrening: number = 0;
+
+  // Istorija svih dolazaka
   prisustva: any[] = [];
-  ukupno: number = 0;
-  danas: number = 0;
-  prijavljeni: number = 0;
 
   constructor() {
-    addIcons({ personOutline, calendarOutline, timeOutline, qrCodeOutline });
+    addIcons({ personOutline, calendarOutline, timeOutline, qrCodeOutline, barbellOutline });
   }
 
   async ngOnInit() {
@@ -30,26 +35,54 @@ export class StatistikaPage implements OnInit {
   }
 
   async ucitajStatistiku() {
-    const sva = await this.authService.getPrisustva();
-    const svePrijave = await this.authService.getPrijave();
+    const trenerUid = this.auth.currentUser?.uid;
+    if (!trenerUid) return;
 
-    this.prisustva = sva.map(p => ({
-      ...p,
-      datumFormatiran: new Date(p['datum']).toLocaleDateString('sr-RS', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }));
+    // 1. Pronađi trenutni trening (±15 min)
+    const sad = new Date();
+    const minus15 = new Date(sad.getTime() - 15 * 60 * 1000);
+    const plus15 = new Date(sad.getTime() + 15 * 60 * 1000);
 
-    this.ukupno = this.prisustva.length;
-    this.prijavljeni = svePrijave.length;
+    this.authService.getTreninziZaTrenera(trenerUid).subscribe(async treninzi => {
+      // pronađi trening koji je u opsegu ±15 min
+      const aktivni = treninzi.find((t: any) => {
+        const datum = new Date(t.datum);
+        return datum >= minus15 && datum <= plus15;
+      });
 
-    const danas = new Date();
-    const pocetak = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate()).toISOString();
-    const kraj = new Date(danas.getFullYear(), danas.getMonth(), danas.getDate() + 1).toISOString();
-    this.danas = this.prisustva.filter(p => p.datum >= pocetak && p.datum < kraj).length;
+      if (aktivni) {
+        this.trenutniTrening = aktivni;
+
+        // broj prijavljenih na taj trening
+        this.prijavljeniNaTrening = Number(aktivni.prijavljeni) || 0;
+
+        // broj koji je skenirao QR (prisustvo) za taj trening
+        const svaPrivisustva = await this.authService.getPrisustva();
+        this.prisutniNaTrening = svaPrivisustva.filter(
+          (p: any) => p.treningId === aktivni.id
+        ).length;
+
+      } else {
+        this.trenutniTrening = null;
+        this.prijavljeniNaTrening = 0;
+        this.prisutniNaTrening = 0;
+      }
+
+      // istorija svih dolazaka za ovog trenera
+      const svaPrivisustva = await this.authService.getPrisustva();
+      const treningIds = treninzi.map((t: any) => t.id);
+      this.prisustva = svaPrivisustva
+        .filter((p: any) => treningIds.includes(p.treningId))
+        .map((p: any) => ({
+          ...p,
+          datumFormatiran: new Date(p.datum).toLocaleDateString('sr-RS', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }));
+    });
   }
 }

@@ -6,7 +6,7 @@ import { Auth } from '@angular/fire/auth';
 import { AuthService } from '../../../services/auth.service';
 import QRCode from 'qrcode';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline } from 'ionicons/icons';
+import { arrowBackOutline, barbell } from 'ionicons/icons';
 
 @Component({
   selector: 'app-qr-kod',
@@ -25,7 +25,7 @@ export class QrKodPage implements OnInit {
   korisnikIme: string = '';
 
   constructor() {
-    addIcons({ arrowBackOutline });
+    addIcons({ arrowBackOutline, barbell });
   }
 
   async ngOnInit() {
@@ -42,8 +42,8 @@ export class QrKodPage implements OnInit {
           width: 250,
           margin: 2,
           color: {
-            dark: '#8B5CF6',
-            light: '#0f0a1e'
+            dark: '#FF6B35',   
+            light: '#1a1a1a'
           }
         });
       } else {

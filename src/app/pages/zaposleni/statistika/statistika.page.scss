@@ -6,123 +6,63 @@ ion-content {
   --background: #0d0d0d;
 }
 
-.statistika-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-}
 
-.title {
-  color: #FF6B35;
-  font-size: 26px;
-  font-weight: 800;
-  margin: 15px 0 20px 0;
-  letter-spacing: 2px;
-}
 
-.stats-row {
-  display: flex;
-  gap: 15px;
+.trenutni-trening-card {
   width: 100%;
+  --background: #1a1a1a;
+  border: 2px solid #FF6B35;
+  border-radius: 16px;
   margin-bottom: 20px;
 }
 
-.stat-card {
-  flex: 1;
+.trenutni-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 32px;
+    color: #FF6B35;
+  }
+
+  h3 {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  p {
+    color: #888;
+    font-size: 13px;
+    margin: 4px 0 0 0;
+  }
+}
+
+.nema-treninga-card {
+  width: 100%;
   --background: #1a1a1a;
-  border: 1px solid rgba(255, 107, 53, 0.4);
+  border: 1px solid #2a2a2a;
   border-radius: 16px;
+  margin-bottom: 20px;
+  text-align: center;
 
   ion-card-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px;
+    gap: 8px;
 
     ion-icon {
-      font-size: 28px;
-      color: #FF6B35;
-      margin-bottom: 8px;
-    }
-
-    h2 {
-      color: #ffffff;
-      font-size: 28px;
-      font-weight: 800;
-      margin: 0;
+      font-size: 36px;
+      color: #555;
     }
 
     p {
-      color: #ffffff;
-      opacity: 0.6;
-      font-size: 12px;
-      margin: 5px 0 0 0;
-      text-align: center;
+      color: #888;
+      font-size: 14px;
     }
   }
-}
-
-.lista-title {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 700;
-  width: 100%;
-  margin: 10px 0 15px 0;
-  opacity: 0.8;
-}
-
-.dolazak-card {
-  width: 100%;
-  --background: #1a1a1a;
-  border: 1px solid rgba(255, 107, 53, 0.3);
-  border-radius: 14px;
-  margin: 8px 0;
-
-  ion-card-content {
-    padding: 15px;
-  }
-}
-
-.dolazak-row {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-
-  ion-icon {
-    font-size: 28px;
-    color: #FF6B35;
-  }
-}
-
-.dolazak-info {
-  h3 {
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0 0 4px 0;
-  }
-
-  p {
-    color: #ffffff;
-    opacity: 0.6;
-    font-size: 13px;
-    margin: 0;
-  }
-}
-
-.nema-podataka {
-  color: #ffffff;
-  opacity: 0.5;
-  font-size: 15px;
-  margin-top: 30px;
-}
-
-.logout-btn {
-  --color: #FF6B35;
-  border: 0.5px solid rgba(255, 107, 53, 0.6);
-  border-radius: 20px;
-  font-size: 13px;
-  margin-right: 8px;
-  text-transform: none;
 }
