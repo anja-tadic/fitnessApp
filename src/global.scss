@@ -42,3 +42,11 @@ ion-content {
 ion-app {
   background: #0f0a1e;
 }
+
+ion-router-outlet {
+  pointer-events: none;
+}
+
+ion-router-outlet > * {
+  pointer-events: all;
+}

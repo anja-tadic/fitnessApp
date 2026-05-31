@@ -9,8 +9,8 @@
 
 <ion-content class="ion-padding">
   <ion-list>
-    <ion-item *ngFor="let trening of treninzi" button detail (click)="otvoriDetalje(trening.id)">
-      <ion-label>
+    <ion-item *ngFor="let trening of treninzi">
+      <ion-label (click)="otvoriDetalje(trening.id)" style="cursor:pointer">
         <h2>{{ trening.naziv }}</h2>
         <p>{{ trening.datum | date:'dd.MM.yyyy HH:mm' }}</p>
         <p>Trener: {{ trening.trenerIme }}</p>
@@ -19,7 +19,7 @@
       <ion-button
         slot="end"
         [disabled]="trening.prijavljen || trening.prijavljeni >= trening.kapacitet"
-        (click)="$event.stopPropagation(); prijaviSe(trening)">
+        (click)="prijaviSe(trening)">
         {{ trening.prijavljen ? 'Prijavljen' : trening.prijavljeni >= trening.kapacitet ? 'Puno' : 'Prijavi se' }}
       </ion-button>
     </ion-item>

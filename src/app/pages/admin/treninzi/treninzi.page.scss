@@ -1,12 +1,20 @@
-ion-datetime-button::part(native) {
-  background: #3a3a5c;
-  color: white;
-  border-radius: 8px;
-  padding: 8px 16px;
+ion-datetime {
+  --background: #1a1a1a;
+  --background-rgb: 26, 26, 26;
+  color: #ffffff;
+}
+
+ion-modal {
+  --background: #1a1a1a;
+}
+
+ion-modal ion-datetime {
+  --background: #1a1a1a;
+  color: #ffffff;
 }
 
 ion-datetime-button::part(native) {
-  background: #3a3a5c;
+  background: #FF6B35;
   color: white;
   border-radius: 8px;
   padding: 8px 16px;
@@ -17,18 +25,24 @@ ion-datetime-button {
 }
 
 .dodaj-btn {
-  --color: #a78bfa;
-  border: 0.5px solid rgba(139, 92, 246, 0.6);
+  --color: #FF6B35;
+  border: 0.5px solid rgba(255, 107, 53, 0.6);
   border-radius: 20px;
   font-size: 13px;
   text-transform: none;
 }
 
 .logout-btn {
-  --color: #a78bfa;
-  border: 0.5px solid rgba(139, 92, 246, 0.6);
+  --color: #FF6B35;
+  border: 0.5px solid rgba(255, 107, 53, 0.6);
   border-radius: 20px;
   font-size: 13px;
   margin-right: 8px;
   text-transform: none;
+}
+.forma-naslov {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0 16px 4px;
 }

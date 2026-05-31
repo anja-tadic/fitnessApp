@@ -185,6 +185,10 @@ async getKlijentiZaTrening(treningId: string): Promise<any[]> {
 
   return (await Promise.all(klijentiPromises)).filter(k => k !== null);
 }
+async updateTrening(id: string, data: any) {
+  const docRef = doc(this.firestore, 'treninzi', id);
+  await updateDoc(docRef, data);
+}
 
 // Nadji sva prisustva sortirana po datumu
 async getPrisustva(): Promise<any[]> {

@@ -3,20 +3,7 @@ ion-toolbar {
 }
 
 ion-content {
-  --background: transparent;
-  background: radial-gradient(ellipse at top, #2d1b69 0%, #0f0a1e 60%) !important;
-}
-
-.background-glow {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+  --background: #0d0d0d;
 }
 
 .statistika-container {
@@ -24,12 +11,10 @@ ion-content {
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
-  position: relative;
-  z-index: 1;
 }
 
 .title {
-  color: #8B5CF6;
+  color: #FF6B35;
   font-size: 26px;
   font-weight: 800;
   margin: 15px 0 20px 0;
@@ -45,8 +30,8 @@ ion-content {
 
 .stat-card {
   flex: 1;
-  --background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.5);
+  --background: #1a1a1a;
+  border: 1px solid rgba(255, 107, 53, 0.4);
   border-radius: 16px;
 
   ion-card-content {
@@ -57,7 +42,7 @@ ion-content {
 
     ion-icon {
       font-size: 28px;
-      color: #8B5CF6;
+      color: #FF6B35;
       margin-bottom: 8px;
     }
 
@@ -89,8 +74,8 @@ ion-content {
 
 .dolazak-card {
   width: 100%;
-  --background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  --background: #1a1a1a;
+  border: 1px solid rgba(255, 107, 53, 0.3);
   border-radius: 14px;
   margin: 8px 0;
 
@@ -106,7 +91,7 @@ ion-content {
 
   ion-icon {
     font-size: 28px;
-    color: #8B5CF6;
+    color: #FF6B35;
   }
 }
 
@@ -132,9 +117,10 @@ ion-content {
   font-size: 15px;
   margin-top: 30px;
 }
+
 .logout-btn {
-  --color: #a78bfa;
-  border: 0.5px solid rgba(139, 92, 246, 0.6);
+  --color: #FF6B35;
+  border: 0.5px solid rgba(255, 107, 53, 0.6);
   border-radius: 20px;
   font-size: 13px;
   margin-right: 8px;

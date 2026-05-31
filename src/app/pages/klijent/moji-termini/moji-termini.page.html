@@ -17,11 +17,13 @@
       </ion-label>
       <ion-button
         slot="end"
-        fill="clear"
+        fill="solid"
         color="danger"
+        size="small"
         [disabled]="!mozeDaOtkaze(termin.datum)"
         (click)="otkazi(termin)">
-        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+        <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+        Otkaži
       </ion-button>
     </ion-item>
 

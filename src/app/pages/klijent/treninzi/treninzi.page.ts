@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
-  IonLabel, IonButton, IonButtons, IonBackButton, AlertController
+  IonLabel, IonButton, IonButtons, IonBackButton, AlertController, MenuController
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { Auth } from '@angular/fire/auth';
@@ -23,31 +23,41 @@ export class TreninziPage implements OnInit {
   private authService = inject(AuthService);
   private alertCtrl = inject(AlertController);
   private router = inject(Router);
-  private auth = inject(Auth); // potreban za currentUser
+  private auth = inject(Auth);
+  private menu = inject(MenuController);
 
   treninzi: any[] = [];
   klijentUid: string = '';
 
-  ngOnInit() {
-    // cekamo da se korisnik ucita
-    this.auth.onAuthStateChanged(async user => {
-      if (user) {
-        this.klijentUid = user.uid;
-        this.ucitajTreninge();
-      }
-    });
-  }
+  async ngOnInit() {
+  await this.menu.close();
+  
+  document.addEventListener('click', (e) => {
+    console.log('KLIK NA STRANICU', e.target);
+  });
+
+  this.auth.onAuthStateChanged(async user => {
+    if (user) {
+      this.klijentUid = user.uid;
+      this.ucitajTreninge();
+    }
+  });
+}
 
   async ucitajTreninge() {
-    // dohvatamo sve treninge
     this.authService.getTreninzi().subscribe(async data => {
-      // za svaki trening proveravamo da li je klijent vec prijavljen
-      const treninziSaStatusom = await Promise.all(data.map(async trening => {
+      const sad = new Date();
+      //sad.setHours(0, 0, 0, 0); 
+
+      const buduci = data.filter((t: any) => new Date(t.datum) > sad);
+      const treninziSaStatusom = await Promise.all(buduci.map(async trening => {
         const prijavljen = await this.authService.jePrijavljen(this.klijentUid, trening.id);
-        return { ...trening, prijavljen };
+         console.log('trening:', trening.naziv, 'kapacitet:', trening.kapacitet, typeof trening.kapacitet, 'prijavljeni:', trening.prijavljeni, typeof trening.prijavljeni);
+        return { ...trening, prijavljen , kapacitet: Number(trening.kapacitet),    
+        prijavljeni: Number(trening.prijavljeni)  
+        };
       }));
 
-      // sortiramo po datumu
       this.treninzi = treninziSaStatusom.sort((a: any, b: any) =>
         new Date(a.datum).getTime() - new Date(b.datum).getTime()
       );
@@ -55,11 +65,10 @@ export class TreninziPage implements OnInit {
   }
 
   async prijaviSe(trening: any) {
-    // provera — prijava najranije 1 dan pre termina
     const treningVreme = new Date(trening.datum).getTime();
     const sadasnjost = new Date().getTime();
     const razlika = treningVreme - sadasnjost;
-    const jedanDan = 24 * 60 * 60 * 1000; // 1 dan u milisekundama
+    const jedanDan = 24 * 60 * 60 * 1000;
 
     if (razlika > jedanDan) {
       const alert = await this.alertCtrl.create({
@@ -79,7 +88,7 @@ export class TreninziPage implements OnInit {
         buttons: ['OK']
       });
       await alert.present();
-      this.ucitajTreninge(); // osvezavamo listu
+      this.ucitajTreninge();
 
     } catch (error) {
       const alert = await this.alertCtrl.create({

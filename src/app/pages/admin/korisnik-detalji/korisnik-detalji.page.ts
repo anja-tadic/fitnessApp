@@ -44,6 +44,7 @@ export class KorisnikDetaljiPage implements OnInit {
       const alert = await this.alertCtrl.create({
         header: 'Greška',
         message: 'Email i telefon su obavezni!',
+        backdropDismiss: false,
         buttons: ['OK']
       });
       await alert.present();
@@ -59,7 +60,11 @@ export class KorisnikDetaljiPage implements OnInit {
       const alert = await this.alertCtrl.create({
         header: 'Uspeh',
         message: 'Podaci uspešno sačuvani!',
-        buttons: [{ text: 'OK', handler: () => this.editMode = false }]
+        backdropDismiss: false,
+        buttons: [{ text: 'OK', handler: async () => {
+          await alert.dismiss();  // eksplicitno ugasi
+          this.editMode = false;
+        } }]
       });
       await alert.present();
 

@@ -7,7 +7,7 @@ import {
   IonSelectOption, IonDatetime, IonDatetimeButton, IonModal, AlertController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { addOutline, trashOutline } from 'ionicons/icons';
+import { addOutline, trashOutline, createOutline } from 'ionicons/icons';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
@@ -30,6 +30,8 @@ export class TreninziPage implements OnInit {
   treninzi: any[] = [];
   treneri: any[] = [];
   prikaziFormu: boolean = false;
+  editMode: boolean = false;
+  editTreningId: string = '';
   minDatum: string = new Date().toISOString();
 
   noviTrening = {
@@ -42,29 +44,44 @@ export class TreninziPage implements OnInit {
   };
 
   constructor() {
-    addIcons({ addOutline, trashOutline });
+    addIcons({ addOutline, trashOutline, createOutline });
   }
 
   ngOnInit() {
-    // dohvatamo treninge iz servisa i sortiramo po datumu
     this.authService.getTreninzi().subscribe(data => {
       this.treninzi = data.sort((a: any, b: any) =>
         new Date(a.datum).getTime() - new Date(b.datum).getTime()
       );
     });
 
-    // dohvatamo trenere iz servisa
     this.authService.getTreneri().subscribe(data => {
       this.treneri = data;
     });
   }
 
   otvoriFormu() {
+    this.editMode = false;
+    this.prikaziFormu = true;
+  }
+
+  otvoriEdit(trening: any) {
+    this.editMode = true;
+    this.editTreningId = trening.id;
+    this.noviTrening = {
+      naziv: trening.naziv,
+      trenerUid: trening.trenerUid,
+      trenerIme: trening.trenerIme,
+      datum: trening.datum,
+      kapacitet: trening.kapacitet,
+      prijavljeni: trening.prijavljeni
+    };
     this.prikaziFormu = true;
   }
 
   zatvoriFormu() {
     this.prikaziFormu = false;
+    this.editMode = false;
+    this.editTreningId = '';
     this.noviTrening = {
       naziv: '',
       trenerUid: '',
@@ -90,26 +107,48 @@ export class TreninziPage implements OnInit {
     this.noviTrening.trenerIme = trener ? trener.name : '';
 
     try {
-      await this.authService.dodajTrening({
-        naziv: this.noviTrening.naziv,
-        trenerUid: this.noviTrening.trenerUid,
-        trenerIme: this.noviTrening.trenerIme,
-        datum: this.noviTrening.datum,
-        kapacitet: Number(this.noviTrening.kapacitet),
-        prijavljeni: 0
-      });
+      if (this.editMode) {
+        // IZMENA postojećeg treninga
+        await this.authService.updateTrening(this.editTreningId, {
+          naziv: this.noviTrening.naziv,
+          trenerUid: this.noviTrening.trenerUid,
+          trenerIme: this.noviTrening.trenerIme,
+          datum: this.noviTrening.datum,
+          kapacitet: Number(this.noviTrening.kapacitet)
+        });
 
-      const alert = await this.alertCtrl.create({
-        header: 'Uspeh',
-        message: 'Trening uspešno dodat!',
-        buttons: [{ text: 'OK', handler: () => this.zatvoriFormu() }]
-      });
-      await alert.present();
+        const alert = await this.alertCtrl.create({
+          header: 'Uspeh',
+          message: 'Trening uspešno izmenjen!',
+          backdropDismiss: false,
+          buttons: [{ text: 'OK', handler: async () => { await alert.dismiss(); this.zatvoriFormu(); } }]
+        });
+        await alert.present();
+
+      } else {
+        // DODAVANJE novog treninga
+        await this.authService.dodajTrening({
+          naziv: this.noviTrening.naziv,
+          trenerUid: this.noviTrening.trenerUid,
+          trenerIme: this.noviTrening.trenerIme,
+          datum: this.noviTrening.datum,
+          kapacitet: Number(this.noviTrening.kapacitet),
+          prijavljeni: 0
+        });
+
+        const alert = await this.alertCtrl.create({
+          header: 'Uspeh',
+          message: 'Trening uspešno dodat!',
+          backdropDismiss: false,
+          buttons: [{ text: 'OK', handler: async () => { await alert.dismiss(); this.zatvoriFormu(); } }]
+        });
+        await alert.present();
+      }
 
     } catch (error) {
       const alert = await this.alertCtrl.create({
         header: 'Greška',
-        message: 'Greška pri dodavanju treninga!',
+        message: 'Greška pri čuvanju treninga!',
         buttons: ['OK']
       });
       await alert.present();
