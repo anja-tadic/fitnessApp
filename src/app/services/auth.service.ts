@@ -41,7 +41,7 @@ export class AuthService {
     return signOut(this.auth); // odjavljuje korisnika iz firebase auth
   }
 
-  // Dohvati ulogu korisnika
+  // Nadji ulogu korisnika
   async getUserRole(uid: string) {
     const docRef = doc(this.firestore, 'users', uid); // trazi dok sa tim id
     const docSnap = await getDoc(docRef); // adresa dokumenta u firestore bazi
@@ -51,14 +51,14 @@ export class AuthService {
     return null;
   }
 
-  // Dohvati sve klijente
+  // Nadji sve klijente
   getKlijenti(): Observable<any[]> {
   const ref = collection(this.firestore, 'users');
   const q = query(ref, where('role', '==', 'klijent')); // filtriramo samo klijente
   return collectionData(q, { idField: 'uid' });
 }
 
-  // Dohvati jednog korisnika po uid, provera qr koda
+  // Nadji jednog korisnika po uid, provera qr koda
   async getUserById(uid: string) {
     const docRef = doc(this.firestore, 'users', uid); // referenca na dokument
     const docSnap = await getDoc(docRef); // dohvata dokument
@@ -73,14 +73,14 @@ export class AuthService {
   async deleteUser(uid: string) {
   await deleteDoc(doc(this.firestore, 'users', uid)); // brise iz firestore
 }
-// Dohvati sve trenere (zaposlene)
+// Nadji sve trenere (zaposlene)
 getTreneri(): Observable<any[]> {
   const ref = collection(this.firestore, 'users');
   const q = query(ref, where('role', '==', 'zaposleni')); // filtriramo po roli
   return collectionData(q, { idField: 'uid' });
 }
 
-// Dohvati sve treninge
+// Nadji sve treninge
 getTreninzi(): Observable<any[]> {
   const ref = collection(this.firestore, 'treninzi');
   return collectionData(ref, { idField: 'id' });
@@ -96,7 +96,7 @@ async obrisiTrening(id: string) {
   await deleteDoc(doc(this.firestore, 'treninzi', id));
 }
 
-// Dohvati termine klijenta
+// Nasji termine klijenta
 async getTerminiKlijenta(klijentUid: string): Promise<any[]> { // vraca niz objekata
   const prijaveRef = collection(this.firestore, 'prijave'); // trazimo sve dokumente
   const q = query(prijaveRef, where('klijentUid', '==', klijentUid)); // gd eje klijentUid = ulogovanom korisniku
@@ -134,7 +134,7 @@ async otkaziTermin(prijavaId: string, treningId: string): Promise<void> {
     prijavljeni: increment(-1)
   });
 }
-// Provjeri da li je klijent vec prijavljen na trening
+// Proveri da li je klijent vec prijavljen na trening
 async jePrijavljen(klijentUid: string, treningId: string): Promise<boolean> {
   const prijaveRef = collection(this.firestore, 'prijave');
   const q = query(prijaveRef, 
@@ -159,5 +159,98 @@ async prijaviNaTrening(klijentUid: string, treningId: string): Promise<void> {
     prijavljeni: increment(1)
   });
 }
+// Nadji trening po id-u
+async getTreningById(id: string): Promise<any> {
+  const docRef = doc(this.firestore, 'treninzi', id);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists() ? { ...docSnap.data(), id } : null;
+}
+// Nadji treninge za određenog trenera
+getTreninziZaTrenera(trenerUid: string): Observable<any[]> {
+  const ref = collection(this.firestore, 'treninzi');
+  const q = query(ref, where('trenerUid', '==', trenerUid));
+  return collectionData(q, { idField: 'id' });
+}
+//Nadjii prijavljene klijente za trening
+async getKlijentiZaTrening(treningId: string): Promise<any[]> {
+  const ref = collection(this.firestore, 'prijave');
+  const q = query(ref, where('treningId', '==', treningId));
+  const snapshot = await getDocs(q);
 
+  const klijentiPromises = snapshot.docs.map(async d => {
+    const prijava = d.data();
+    const userSnap = await getDoc(doc(this.firestore, 'users', prijava['klijentUid']));
+    return userSnap.exists() ? userSnap.data() : null;
+  });
+
+  return (await Promise.all(klijentiPromises)).filter(k => k !== null);
+}
+
+// Nadji sva prisustva sortirana po datumu
+async getPrisustva(): Promise<any[]> {
+  const ref = collection(this.firestore, 'prisustvo');
+  const q = query(ref, orderBy('datum', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    ...doc.data(),
+    id: doc.id
+  }));
+}
+//Pamti prisustvo treninga
+async snimiPrisustvo(klijentUid: string): Promise<string> {
+  
+  // trazimo trening koji pocinje za +-15 min
+  const sad = new Date();
+  const minus15 = new Date(sad.getTime() - 15 * 60 * 1000).toISOString();
+  const plus15 = new Date(sad.getTime() + 15 * 60 * 1000).toISOString();
+
+  const treninziRef = collection(this.firestore, 'treninzi');
+  const q = query(treninziRef, 
+    where('datum', '>=', minus15),
+    where('datum', '<=', plus15)
+  );
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
+    return 'nema_treninga'; // nema treninga u ovom trenutku
+  }
+
+  const treningDoc = snapshot.docs[0];
+  const trening = { id: treningDoc.id, ...(treningDoc.data() as any) };
+
+  // proveravamo da li je klijent prijavljen na ovaj trening
+  const prijavljen = await this.jePrijavljen(klijentUid, trening['id']);
+  if (!prijavljen) {
+    return 'nije_prijavljen'; // klijent nije prijavljen na ovaj trening
+  }
+
+  // proveravamo da li je vec evidentiran na ovom treningu
+  const prisustvoRef = collection(this.firestore, 'prisustvo');
+  const duplikatQ = query(prisustvoRef,
+    where('klijentUid', '==', klijentUid),
+    where('treningId', '==', trening['id'])
+  );
+  const duplikatSnap = await getDocs(duplikatQ);
+  if (!duplikatSnap.empty) {
+    return 'vec_evidentiran'; // vec skeniran
+  }
+
+  // snimamo prisustvo
+  await addDoc(collection(this.firestore, 'prisustvo'), {
+    klijentUid,
+    ime: '', // popunjava se ispod
+    treningId: trening['id'],
+    treningNaziv: trening['naziv'],
+    datum: new Date().toISOString()
+  });
+
+  return 'ok';
+}
+
+// Nadji sve prijave
+async getPrijave(): Promise<any[]> {
+  const ref = collection(this.firestore, 'prijave');
+  const snapshot = await getDocs(ref);
+  return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+}
 }

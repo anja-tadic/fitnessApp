@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonBackButton, IonButtons, IonItemDivider } from '@ionic/angular/standalone';
-import { Firestore, doc, getDoc, collection, query, where, getDocs } from '@angular/fire/firestore';
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-trening-detalji',
@@ -13,45 +13,21 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class TreningDetaljiPage implements OnInit {
 
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+
   trening: any = null;
   klijenti: any[] = [];
 
-  constructor(
-    private firestore: Firestore,
-    private route: ActivatedRoute
-  ) {}
-
   async ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.route.snapshot.paramMap.get('id'); // uzimamo id iz URL-a
 
     if (id) {
-      // Ucitavamo podatke o treningu
-      const docRef = doc(this.firestore, 'treninzi', id);
-      const docSnap = await getDoc(docRef);
+      this.trening = await this.authService.getTreningById(id); // koristimo postojecu metodu
 
-      if (docSnap.exists()) {
-        this.trening = { id: docSnap.id, ...docSnap.data() };
-
-        // Ucitavamo prijavljene klijente
-        await this.ucitajKlijente(id);
+      if (this.trening) {
+        this.klijenti = await this.authService.getKlijentiZaTrening(id); // dohvatamo prijavljene
       }
     }
-  }
-
-  async ucitajKlijente(treningId: string) {
-    // Trazimo sve prijave za ovaj trening
-    const ref = collection(this.firestore, 'prijave');
-    const q = query(ref, where('treningId', '==', treningId));
-    const snapshot = await getDocs(q);
-
-    // Za svaku prijavu uzimamo podatke o klijentu
-    const klijentiPromises = snapshot.docs.map(async d => {
-      const prijava = d.data();
-      const userRef = doc(this.firestore, 'users', prijava['klijentUid']);
-      const userSnap = await getDoc(userRef);
-      return userSnap.exists() ? userSnap.data() : null;
-    });
-
-    this.klijenti = (await Promise.all(klijentiPromises)).filter(k => k !== null);
   }
 }

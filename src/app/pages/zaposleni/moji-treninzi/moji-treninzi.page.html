@@ -1,17 +1,12 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Moji treninzi</ion-title>
-    <ion-buttons slot="end">
-      <ion-button class="logout-btn" (click)="odjavi()">
-        Odjavi se
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-list>
-   <ion-item *ngFor="let trening of treninzi" button detail (click)="otvoriDetalje(trening.id)">
+    <ion-item *ngFor="let trening of treninzi" button detail (click)="otvoriDetalje(trening.id)">
       <ion-label>
         <h2>{{ trening.naziv }}</h2>
         <p>{{ trening.datum | date:'dd.MM.yyyy HH:mm' }}</p>

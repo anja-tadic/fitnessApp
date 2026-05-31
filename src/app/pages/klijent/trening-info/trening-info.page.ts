@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonItem, IonLabel, IonBackButton, IonButtons } from '@ionic/angular/standalone';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
 import { ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-trening-info',
@@ -13,25 +13,16 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class TreningInfoPage implements OnInit {
 
+  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute); // citamo id iz URL-a
+
   trening: any = null; // podaci o treningu
 
-  constructor(
-    private firestore: Firestore,
-    private route: ActivatedRoute // citamo id iz URL-a
-  ) {}
-
   async ngOnInit() {
-    // Uzimamo id treninga iz URL-a
-    const id = this.route.snapshot.paramMap.get('id');
+    const id = this.route.snapshot.paramMap.get('id'); // uzimamo id iz URL-a
 
     if (id) {
-      // Ucitavamo trening iz baze po id-u
-      const docRef = doc(this.firestore, 'treninzi', id);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        this.trening = docSnap.data();
-      }
+      this.trening = await this.authService.getTreningById(id); 
     }
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { calendarOutline, qrCodeOutline, barChartOutline } from 'ionicons/icons';
 
@@ -8,7 +8,7 @@ import { calendarOutline, qrCodeOutline, barChartOutline } from 'ionicons/icons'
   templateUrl: './zaposleni.page.html',
   styleUrls: ['./zaposleni.page.scss'],
   standalone: true,
-  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel]
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet]
 })
 export class ZaposleniPage {
   constructor() {

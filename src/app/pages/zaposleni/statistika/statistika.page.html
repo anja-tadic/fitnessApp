@@ -1,11 +1,6 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Train Club</ion-title>
-    <ion-buttons slot="end">
-      <ion-button class="logout-btn" (click)="logout()">
-        Odjavi se
-      </ion-button>
-    </ion-buttons>
+    <ion-title>Statistika</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -27,8 +22,16 @@
       <ion-card class="stat-card">
         <ion-card-content>
           <ion-icon name="person-outline"></ion-icon>
+          <h2>{{ prijavljeni }}</h2>
+          <p>Prijavljeni</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="stat-card">
+        <ion-card-content>
+          <ion-icon name="qr-code-outline"></ion-icon>
           <h2>{{ ukupno }}</h2>
-          <p>Ukupno dolazaka</p>
+          <p>Skenirali QR</p>
         </ion-card-content>
       </ion-card>
 

@@ -22,6 +22,7 @@ export class QrPage implements OnInit, OnDestroy {
   korisnik: any = null;
   validan: boolean = false;
   nevalidan: boolean = false;
+  poruka: string = '';
 
   constructor() {
     addIcons({ qrCodeOutline, checkmarkCircleOutline, closeCircleOutline });
@@ -54,22 +55,41 @@ export class QrPage implements OnInit, OnDestroy {
     }
   }
 
-  async proveriQR(uid: string) {
-    try {
-      const korisnik = await this.authService.getUserById(uid); // koristimo servis
-      if (korisnik) {
-        this.korisnik = korisnik;
+async proveriQR(uid: string) {
+  try {
+    const korisnik = await this.authService.getUserById(uid);
+    if (korisnik) {
+      this.korisnik = korisnik;
+
+      const rezultat = await this.authService.snimiPrisustvo(uid);
+
+      if (rezultat === 'ok') {
         this.validan = true;
         this.nevalidan = false;
-      } else {
+      } else if (rezultat === 'nema_treninga') {
         this.korisnik = null;
         this.validan = false;
         this.nevalidan = true;
+        this.poruka = 'Nema aktivnog treninga u ovom trenutku!';
+      } else if (rezultat === 'nije_prijavljen') {
+        this.korisnik = null;
+        this.validan = false;
+        this.nevalidan = true;
+        this.poruka = 'Klijent nije prijavljen na trenutni trening!';
+      } else if (rezultat === 'vec_evidentiran') {
+        this.validan = true;
+        this.nevalidan = false;
+        this.poruka = 'Klijent je već evidentiran!';
       }
-    } catch (error) {
+    } else {
+      this.validan = false;
       this.nevalidan = true;
+      this.poruka = 'QR kod nije validan!';
     }
+  } catch (error) {
+    this.nevalidan = true;
   }
+}
 
   ngOnDestroy() {
     this.stopSkeniranje();
