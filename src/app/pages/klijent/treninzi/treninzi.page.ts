@@ -70,7 +70,7 @@ export class TreninziPage implements OnInit {
     const razlika = treningVreme - sadasnjost;
     const jedanDan = 24 * 60 * 60 * 1000;
 
-    if (razlika > jedanDan) {
+    if (razlika < jedanDan) {
       const alert = await this.alertCtrl.create({
         header: 'Prerano',
         message: 'Možete se prijaviti najranije 1 dan pre termina!',

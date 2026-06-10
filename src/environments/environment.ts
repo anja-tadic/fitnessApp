@@ -11,9 +11,11 @@ export const environment = {
     storageBucket: "fitnessapp-cfb04.firebasestorage.app",
     messagingSenderId: "1006200427907",
     appId: "1:1006200427907:web:f5a62268955b8edbaa12b6",
-    measurementId: "G-3LMPQTPG7E"
+    measurementId: "G-3LMPQTPG7E",
+    databaseURL: "https://fitnessapp-cfb04-default-rtdb.europe-west1.firebasedatabase.app"
   }
 };
+
 
 /*
  * For easier debugging in development mode, you can import the following file
