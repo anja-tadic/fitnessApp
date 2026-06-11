@@ -2,6 +2,9 @@
   <ion-toolbar>
     <ion-title>Train Club</ion-title>
     <ion-buttons slot="end">
+      <ion-button class="logout-btn" (click)="logout()">
+        Odjavi se
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -16,14 +19,8 @@
     <h1 class="title">Provera QR Koda</h1>
     <p class="subtitle">Skenirajte QR kod klijenta</p>
 
-    <div id="qr-reader-admin" class="qr-reader-box"></div>
-
-    <ion-button *ngIf="!skeniranje" expand="block" class="skener-btn" (click)="startSkeniranje()">
+    <ion-button expand="block" class="skener-btn" (click)="startSkeniranje()">
       Pokreni skener
-    </ion-button>
-
-    <ion-button *ngIf="skeniranje" expand="block" fill="outline" class="stop-btn" (click)="stopSkeniranje()">
-      Zaustavi skener
     </ion-button>
 
     <ion-card class="rezultat-card validan-card" *ngIf="validan && korisnik">
