@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { barbellOutline, calendarOutline, qrCodeOutline } from 'ionicons/icons';
+import { barbellOutline, calendarOutline, qrCodeOutline, logOutOutline } from 'ionicons/icons';
+import { Auth, signOut } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-klijent',
@@ -11,7 +13,15 @@ import { barbellOutline, calendarOutline, qrCodeOutline } from 'ionicons/icons';
   imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet]
 })
 export class KlijentPage {
+  private auth = inject(Auth);
+  private router = inject(Router);
+
   constructor() {
-    addIcons({ barbellOutline, calendarOutline, qrCodeOutline });
+    addIcons({ barbellOutline, calendarOutline, qrCodeOutline, logOutOutline });
+  }
+
+  async onLogOut() {
+    await signOut(this.auth);
+    this.router.navigate(['/login']);
   }
 }

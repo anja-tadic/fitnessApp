@@ -86,14 +86,6 @@
     </ion-content>
   </ion-menu>
 
-  @if (role !== '') {
-    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-      <ion-fab-button (click)="onLogOut()" color="danger" size="small">
-        <ion-icon name="log-out"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
-  }
-
   <ion-router-outlet id="main" (click)="menu.close()"></ion-router-outlet>
 
 </ion-app>

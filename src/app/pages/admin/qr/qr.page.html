@@ -1,11 +1,6 @@
 <ion-header class="ion-no-border">
   <ion-toolbar>
     <ion-title>Train Club</ion-title>
-    <ion-buttons slot="end">
-      <ion-button class="logout-btn" (click)="logout()">
-        Odjavi se
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -27,12 +22,12 @@
       <ion-card-content>
         <div class="rezultat-header">
           <ion-icon name="checkmark-circle-outline" class="validan-icon"></ion-icon>
-          <h2>QR Kod je autentičan ✅</h2>
+          <h2>QR Kod je autentičan </h2>
         </div>
         <div class="korisnik-info">
           <p><strong>Ime:</strong> {{ korisnik.name }}</p>
           <p><strong>Email:</strong> {{ korisnik.email }}</p>
-          <p><strong>Rola:</strong> {{ korisnik.role }}</p>
+          <p><strong>Uloga:</strong> {{ korisnik.role }}</p>
           <p><strong>Pol:</strong> {{ korisnik.gender }}</p>
           <p><strong>Telefon:</strong> {{ korisnik.phone }}</p>
         </div>
