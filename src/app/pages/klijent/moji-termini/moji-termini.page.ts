@@ -1,7 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonButton, IonBackButton, IonButtons, IonIcon, AlertController } from '@ionic/angular/standalone';
-import { Auth } from '@angular/fire/auth';
 import { addIcons } from 'ionicons';
 import { closeCircleOutline } from 'ionicons/icons';
 import { AuthService } from '../../../services/auth.service';
@@ -13,10 +12,9 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem, IonLabel, IonButton, IonBackButton, IonButtons, IonIcon, CommonModule]
 })
-export class MojiTerminiPage implements OnInit {
+export class MojiTerminiPage {
 
   private authService = inject(AuthService);
-  private auth = inject(Auth); // potreban samo za currentUser
   private alertCtrl = inject(AlertController);
 
   termini: any[] = [];
@@ -25,16 +23,17 @@ export class MojiTerminiPage implements OnInit {
     addIcons({ closeCircleOutline });
   }
 
-  ngOnInit() {
-    this.auth.onAuthStateChanged(user => {
-      if (user) {
-        this.ucitajTermine(user.uid);
-      }
-    });
+  ionViewWillEnter() {
+    const uid = this.authService.getUserId();
+    if (uid) {
+      this.ucitajTermine(uid);
+    }
   }
 
-  async ucitajTermine(klijentUid: string) {
-    this.termini = await this.authService.getTerminiKlijenta(klijentUid); 
+  ucitajTermine(klijentUid: string) {
+    this.authService.getTerminiKlijenta(klijentUid).subscribe(termini => {
+      this.termini = termini;
+    });
   }
 
   // Proveravamo da li klijent moze da otkaze — mora biti najmanje 1h pre treninga
@@ -65,25 +64,28 @@ export class MojiTerminiPage implements OnInit {
         {
           text: 'Otkaži termin',
           role: 'destructive',
-          handler: async () => {
-            try {
-              await this.authService.otkaziTermin(termin.prijavaId, termin.treningId); 
-
-              const successAlert = await this.alertCtrl.create({
-                header: 'Uspeh',
-                message: 'Termin je uspešno otkazan!',
-                buttons: [{ text: 'OK', handler: () => this.ucitajTermine(this.auth.currentUser!.uid) }]
-              });
-              await successAlert.present();
-
-            } catch (error) {
-              const errAlert = await this.alertCtrl.create({
-                header: 'Greška',
-                message: 'Greška pri otkazivanju!',
-                buttons: ['OK']
-              });
-              await errAlert.present();
-            }
+          handler: () => {
+            this.authService.otkaziTermin(termin.prijavaId, termin.treningId).subscribe({
+              next: async () => {
+                const successAlert = await this.alertCtrl.create({
+                  header: 'Uspeh',
+                  message: 'Termin je uspešno otkazan!',
+                  buttons: [{ text: 'OK', handler: () => {
+                    const uid = this.authService.getUserId();
+                    if (uid) this.ucitajTermine(uid);
+                  } }]
+                });
+                await successAlert.present();
+              },
+              error: async () => {
+                const errAlert = await this.alertCtrl.create({
+                  header: 'Greška',
+                  message: 'Greška pri otkazivanju!',
+                  buttons: ['OK']
+                });
+                await errAlert.present();
+              }
+            });
           }
         }
       ]

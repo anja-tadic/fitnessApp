@@ -2,8 +2,8 @@ import { Component, inject } from '@angular/core';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { calendarOutline, qrCodeOutline, barChartOutline, logOutOutline } from 'ionicons/icons';
-import { Auth, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-zaposleni',
@@ -13,15 +13,15 @@ import { Router } from '@angular/router';
   imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, IonRouterOutlet]
 })
 export class ZaposleniPage {
-  private auth = inject(Auth);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   constructor() {
     addIcons({ calendarOutline, qrCodeOutline, barChartOutline, logOutOutline });
   }
 
-  async onLogOut() {
-    await signOut(this.auth);
+  onLogOut() {
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

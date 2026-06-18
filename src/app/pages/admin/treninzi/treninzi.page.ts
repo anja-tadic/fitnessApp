@@ -1,9 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar, IonList, IonItem,
-  IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect,
+  IonLabel, IonButton, IonButtons, IonIcon, IonInput, IonSelect, 
   IonSelectOption, IonDatetime, IonDatetimeButton, IonModal, AlertController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -22,7 +22,7 @@ import { AuthService } from '../../../services/auth.service';
     CommonModule, FormsModule
   ]
 })
-export class TreninziPage implements OnInit {
+export class TreninziPage {
 
   private authService = inject(AuthService);
   private alertCtrl = inject(AlertController);
@@ -47,7 +47,7 @@ export class TreninziPage implements OnInit {
     addIcons({ addOutline, trashOutline, createOutline });
   }
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.authService.getTreninzi().subscribe(data => {
       this.treninzi = data.sort((a: any, b: any) =>
         new Date(a.datum).getTime() - new Date(b.datum).getTime()
@@ -106,52 +106,92 @@ export class TreninziPage implements OnInit {
     const trener = this.treneri.find(t => t.uid === this.noviTrening.trenerUid);
     this.noviTrening.trenerIme = trener ? trener.name : '';
 
-    try {
-      if (this.editMode) {
-        // IZMENA postojećeg treninga
-        await this.authService.updateTrening(this.editTreningId, {
-          naziv: this.noviTrening.naziv,
-          trenerUid: this.noviTrening.trenerUid,
-          trenerIme: this.noviTrening.trenerIme,
-          datum: this.noviTrening.datum,
-          kapacitet: Number(this.noviTrening.kapacitet)
-        });
+    if (this.editMode) {
+      // IZMENA postojećeg treninga
+      this.authService.updateTrening(this.editTreningId, {
+        naziv: this.noviTrening.naziv,
+        trenerUid: this.noviTrening.trenerUid,
+        trenerIme: this.noviTrening.trenerIme,
+        datum: this.noviTrening.datum,
+        kapacitet: Number(this.noviTrening.kapacitet)
+      }).subscribe({
+        next: async () => {
+          // GET više nije realtime listener, pa ručno ažuriramo lokalnu listu
+          const idx = this.treninzi.findIndex(t => t.id === this.editTreningId);
+          if (idx !== -1) {
+            this.treninzi[idx] = {
+              ...this.treninzi[idx],
+              naziv: this.noviTrening.naziv,
+              trenerUid: this.noviTrening.trenerUid,
+              trenerIme: this.noviTrening.trenerIme,
+              datum: this.noviTrening.datum,
+              kapacitet: Number(this.noviTrening.kapacitet)
+            };
+            this.treninzi.sort((a: any, b: any) =>
+              new Date(a.datum).getTime() - new Date(b.datum).getTime()
+            );
+          }
 
-        const alert = await this.alertCtrl.create({
-          header: 'Uspeh',
-          message: 'Trening uspešno izmenjen!',
-          backdropDismiss: false,
-          buttons: [{ text: 'OK', handler: async () => { await alert.dismiss(); this.zatvoriFormu(); } }]
-        });
-        await alert.present();
-
-      } else {
-        // DODAVANJE novog treninga
-        await this.authService.dodajTrening({
-          naziv: this.noviTrening.naziv,
-          trenerUid: this.noviTrening.trenerUid,
-          trenerIme: this.noviTrening.trenerIme,
-          datum: this.noviTrening.datum,
-          kapacitet: Number(this.noviTrening.kapacitet),
-          prijavljeni: 0
-        });
-
-        const alert = await this.alertCtrl.create({
-          header: 'Uspeh',
-          message: 'Trening uspešno dodat!',
-          backdropDismiss: false,
-          buttons: [{ text: 'OK', handler: async () => { await alert.dismiss(); this.zatvoriFormu(); } }]
-        });
-        await alert.present();
-      }
-
-    } catch (error) {
-      const alert = await this.alertCtrl.create({
-        header: 'Greška',
-        message: 'Greška pri čuvanju treninga!',
-        buttons: ['OK']
+          const alert = await this.alertCtrl.create({
+            header: 'Uspeh',
+            message: 'Trening uspešno izmenjen!',
+            backdropDismiss: false,
+            buttons: [{ text: 'OK', handler: async () => { await alert.dismiss(); this.zatvoriFormu(); } }]
+          });
+          await alert.present();
+        },
+        error: async () => {
+          const alert = await this.alertCtrl.create({
+            header: 'Greška',
+            message: 'Greška pri čuvanju treninga!',
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
       });
-      await alert.present();
+
+    } else {
+      // DODAVANJE novog treninga
+      this.authService.dodajTrening({
+        naziv: this.noviTrening.naziv,
+        trenerUid: this.noviTrening.trenerUid,
+        trenerIme: this.noviTrening.trenerIme,
+        datum: this.noviTrening.datum,
+        kapacitet: Number(this.noviTrening.kapacitet),
+        prijavljeni: 0
+      }).subscribe({
+        next: async (response) => {
+          // POST vraca { name: 'generisaniKljuc' }, kao push() ranije
+          this.treninzi.push({
+            id: response.name,
+            naziv: this.noviTrening.naziv,
+            trenerUid: this.noviTrening.trenerUid,
+            trenerIme: this.noviTrening.trenerIme,
+            datum: this.noviTrening.datum,
+            kapacitet: Number(this.noviTrening.kapacitet),
+            prijavljeni: 0
+          });
+          this.treninzi.sort((a: any, b: any) =>
+            new Date(a.datum).getTime() - new Date(b.datum).getTime()
+          );
+
+          const alert = await this.alertCtrl.create({
+            header: 'Uspeh',
+            message: 'Trening uspešno dodat!',
+            backdropDismiss: false,
+            buttons: [{ text: 'OK', handler: async () => { await alert.dismiss(); this.zatvoriFormu(); } }]
+          });
+          await alert.present();
+        },
+        error: async () => {
+          const alert = await this.alertCtrl.create({
+            header: 'Greška',
+            message: 'Greška pri čuvanju treninga!',
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
+      });
     }
   }
 
@@ -164,8 +204,11 @@ export class TreninziPage implements OnInit {
         {
           text: 'Obriši',
           role: 'destructive',
-          handler: async () => {
-            await this.authService.obrisiTrening(id);
+          handler: () => {
+            this.authService.obrisiTrening(id).subscribe(() => {
+              // GET više nije realtime listener, pa ručno ažuriramo lokalnu listu
+              this.treninzi = this.treninzi.filter(t => t.id !== id);
+            });
           }
         }
       ]

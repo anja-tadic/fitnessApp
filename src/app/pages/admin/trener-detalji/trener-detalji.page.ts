@@ -27,10 +27,12 @@ export class TrenerDetaljiPage implements OnInit {
   trener: any = null;
   editMode: boolean = false; // da li je forma za izmenu otvorena
 
-  async ngOnInit() {
+  ngOnInit() {
     const uid = this.route.snapshot.paramMap.get('uid');
     if (uid) {
-      this.trener = await this.authService.getUserById(uid); // Otvaramo detalje tog jednog trenera
+      this.authService.getUserById(uid).subscribe(trener => {
+        this.trener = trener; // Otvaramo detalje tog jednog trenera
+      });
     }
   }
 
@@ -49,30 +51,30 @@ export class TrenerDetaljiPage implements OnInit {
       return;
     }
 
-    try {
-      await this.authService.updateUser(this.trener.uid, { // editovanje korisnika
-        email: this.trener.email,
-        phone: this.trener.phone
-      });
-
-      const alert = await this.alertCtrl.create({
-        header: 'Uspeh',
-        message: 'Podaci uspešno sačuvani!',
-        backdropDismiss: false,
-        buttons: [{ text: 'OK', handler: async () => {
-          await alert.dismiss();  // eksplicitno ugasi
-          this.editMode = false;
-        } }]
-      });
-      await alert.present();
-
-    } catch (error) {
-      const alert = await this.alertCtrl.create({
-        header: 'Greška',
-        message: 'Greška pri čuvanju podataka!',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+    this.authService.updateUser(this.trener.uid, { // editovanje korisnika
+      email: this.trener.email,
+      phone: this.trener.phone
+    }).subscribe({
+      next: async () => {
+        const alert = await this.alertCtrl.create({
+          header: 'Uspeh',
+          message: 'Podaci uspešno sačuvani!',
+          backdropDismiss: false,
+          buttons: [{ text: 'OK', handler: async () => {
+            await alert.dismiss();  // eksplicitno ugasi
+            this.editMode = false;
+          } }]
+        });
+        await alert.present();
+      },
+      error: async () => {
+        const alert = await this.alertCtrl.create({
+          header: 'Greška',
+          message: 'Greška pri čuvanju podataka!',
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    });
   }
 }

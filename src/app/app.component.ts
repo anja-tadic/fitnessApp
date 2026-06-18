@@ -34,18 +34,17 @@ export class AppComponent implements OnInit {
     });
   }
 
-  async ngOnInit() {
-    this.authService.currentUser$.subscribe(async (user) => {
-      if (user) {
-        this.role = await this.authService.getUserRole(user.uid);
-      } else {
-        this.role = '';
-      }
-    });
+  ngOnInit() {
+    const uid = this.authService.getUserId();
+    if (uid) {
+      this.authService.getUserRole(uid).subscribe(role => {
+        this.role = role;
+      });
+    }
   }
 
-  async onLogOut() {
-    await this.authService.logout();
+  onLogOut() {
+    this.authService.logout();
     this.role = '';
     this.router.navigateByUrl('/login');
   }

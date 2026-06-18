@@ -53,61 +53,70 @@ export class QrPage implements OnInit {
       });
 
       if (result.ScanResult) {
-        await this.proveriQR(result.ScanResult);
+        // proveriQR sad samo pokrece subscribe (HTTP poziv), ne vraca Promise, zato bez await
+        this.proveriQR(result.ScanResult);
       }
     } catch (error) {
       // ako korisnik otkaze skeniranje ili dodje do greske, samo ignorisemo
     }
   }
 
-  async proveriQR(uid: string) {
-    try {
-      //Pitamo bazu (preko servisa) da li postoji korisnik sa tim uid-om.
-      const korisnik = await this.authService.getUserById(uid);
-      if (korisnik) {
-        //Ako korisnik postoji, čuvamo njegove podatke i pozivamo funkciju 
-        // koja pokušava da zabeleži prisustvo na trenutnom treningu. Ta funkcija vraća string sa rezultatom
-        this.korisnik = korisnik;
+  proveriQR(uid: string) {
+    //Pitamo bazu (preko servisa) da li postoji korisnik sa tim uid-om.
+    this.authService.getUserById(uid).subscribe({
+      next: (korisnik) => {
+        if (korisnik) {
+          //Ako korisnik postoji, čuvamo njegove podatke i pozivamo funkciju 
+          // koja pokušava da zabeleži prisustvo na trenutnom treningu. Ta funkcija vraća string sa rezultatom
+          this.korisnik = korisnik;
 
-        const rezultat = await this.authService.snimiPrisustvo(uid);
-
-        if (rezultat === 'ok') {
-          //Ako je sve u redu – prisustvo je zabeleženo, prikazujemo zelenu karticu sa podacima korisnika.
-          this.validan = true;
-          this.nevalidan = false;
-        } else if (rezultat === 'nema_treninga') {
-          //Ako trenutno nema treninga koji se odvija, prikazuje se poruka
-          this.korisnik = null;
+          this.authService.snimiPrisustvo(uid).subscribe({
+            next: (rezultat) => {
+              if (rezultat === 'ok') {
+                //Ako je sve u redu – prisustvo je zabeleženo, prikazujemo zelenu karticu sa podacima korisnika.
+                this.validan = true;
+                this.nevalidan = false;
+              } else if (rezultat === 'nema_treninga') {
+                //Ako trenutno nema treninga koji se odvija, prikazuje se poruka
+                this.korisnik = null;
+                this.validan = false;
+                this.nevalidan = true;
+                this.poruka = 'Nema aktivnog treninga u ovom trenutku!';
+              } else if (rezultat === 'nije_prijavljen') {
+                this.korisnik = null;
+                this.validan = false;
+                this.nevalidan = true;
+                this.poruka = 'Klijent nije prijavljen na trenutni trening!';
+              } else if (rezultat === 'vec_evidentiran') {
+                // i dalje prikazujemo zelenu karticu (validan kod), ali sa porukom da je već evidentiran.
+                this.validan = true;
+                this.nevalidan = false;
+                this.poruka = 'Klijent je već evidentiran!';
+              }
+            },
+            error: () => {
+              //Ako nešto pukne (npr. greška u komunikaciji sa bazom), tretiramo kao nevalidan kod
+              this.nevalidan = true;
+            }
+          });
+        } else {
+          //Ako korisnik sa tim uid-om uopšte ne postoji u bazi
+          // kod nije validan, prikazuje se crvena kartica
           this.validan = false;
           this.nevalidan = true;
-          this.poruka = 'Nema aktivnog treninga u ovom trenutku!';
-        } else if (rezultat === 'nije_prijavljen') {
-          this.korisnik = null;
-          this.validan = false;
-          this.nevalidan = true;
-          this.poruka = 'Klijent nije prijavljen na trenutni trening!';
-        } else if (rezultat === 'vec_evidentiran') {
-          // i dalje prikazujemo zelenu karticu (validan kod), ali sa porukom da je već evidentiran.
-          this.validan = true;
-          this.nevalidan = false;
-          this.poruka = 'Klijent je već evidentiran!';
+          this.poruka = 'QR kod nije validan!';
         }
-      } else {
-        //Ako korisnik sa tim uid-om uopšte ne postoji u bazi
-        // kod nije validan, prikazuje se crvena kartica
-        this.validan = false;
+      },
+      error: () => {
+        //Ako nešto pukne (npr. greška u komunikaciji sa bazom), tretiramo kao nevalidan kod
         this.nevalidan = true;
-        this.poruka = 'QR kod nije validan!';
       }
-    } catch (error) {
-      //Ako nešto pukne (npr. greška u komunikaciji sa bazom), tretiramo kao nevalidan kod
-      this.nevalidan = true;
-    }
+    });
   }
 
-  async logout() {
+  logout() {
     //Kada admin klikne Odjavi se – odjavljujemo ga preko servisa i šaljemo nazad na login stranicu.
-    await this.authService.logout();//await - sačekaj da se ovo završi pre nego što nastaviš na sledeću liniju
+    this.authService.logout();//logout je sad sinhrona metoda (ne vraca Promise/Observable), zato bez await
     this.router.navigate(['/login']);
   }
 }

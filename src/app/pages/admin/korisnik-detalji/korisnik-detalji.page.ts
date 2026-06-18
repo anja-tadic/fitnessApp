@@ -28,10 +28,12 @@ export class KorisnikDetaljiPage implements OnInit {
   korisnik: any = null;
   editMode: boolean = false;
 
-  async ngOnInit() {
+  ngOnInit() {
     const uid = this.route.snapshot.paramMap.get('uid');
     if (uid) {
-      this.korisnik = await this.authService.getUserById(uid);
+      this.authService.getUserById(uid).subscribe(korisnik => {
+        this.korisnik = korisnik;
+      });
     }
   }
 
@@ -51,30 +53,30 @@ export class KorisnikDetaljiPage implements OnInit {
       return;
     }
 
-    try {
-      await this.authService.updateUser(this.korisnik.uid, {
-        email: this.korisnik.email,
-        phone: this.korisnik.phone
-      });
-
-      const alert = await this.alertCtrl.create({
-        header: 'Uspeh',
-        message: 'Podaci uspešno sačuvani!',
-        backdropDismiss: false,
-        buttons: [{ text: 'OK', handler: async () => {
-          await alert.dismiss();  // eksplicitno ugasi
-          this.editMode = false;
-        } }]
-      });
-      await alert.present();
-
-    } catch (error) {
-      const alert = await this.alertCtrl.create({
-        header: 'Greška',
-        message: 'Greška pri čuvanju podataka!',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+    this.authService.updateUser(this.korisnik.uid, {
+      email: this.korisnik.email,
+      phone: this.korisnik.phone
+    }).subscribe({
+      next: async () => {
+        const alert = await this.alertCtrl.create({
+          header: 'Uspeh',
+          message: 'Podaci uspešno sačuvani!',
+          backdropDismiss: false,
+          buttons: [{ text: 'OK', handler: async () => {
+            await alert.dismiss();  // eksplicitno ugasi
+            this.editMode = false;
+          } }]
+        });
+        await alert.present();
+      },
+      error: async () => {
+        const alert = await this.alertCtrl.create({
+          header: 'Greška',
+          message: 'Greška pri čuvanju podataka!',
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    });
   }
 }

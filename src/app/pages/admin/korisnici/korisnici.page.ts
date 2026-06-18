@@ -1,9 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonLabel, IonBadge, IonButtons, IonButton, IonSearchbar } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { AlertController } from '@ionic/angular/standalone';
 import { AuthService } from '../../../services/auth.service';
 
@@ -14,7 +13,7 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonLabel, IonBadge, IonButtons, IonButton, IonSearchbar, CommonModule, FormsModule]
 })
-export class KorisniciPage implements OnInit {
+export class KorisniciPage {
 
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -24,7 +23,7 @@ export class KorisniciPage implements OnInit {
   filtrirani: any[] = [];       // korisnici koji se prikazuju nakon pretrage
   pretragaTermin: string = '';  // tekst koji korisnik ukuca
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.authService.getKlijenti().subscribe(korisnici => {
       this.korisnici = korisnici;       // čuvamo sve
       this.filtrirani = korisnici;      // na početku prikazujemo sve
@@ -53,9 +52,12 @@ export class KorisniciPage implements OnInit {
         {
           text: 'Obriši',
           role: 'destructive',
-          handler: async () => {
-            await this.authService.deleteUser(uid);
-            // lista se automatski osvežava jer koristimo subscribe
+          handler: () => {
+            this.authService.deleteUser(uid).subscribe(() => {
+              // GET više nije realtime listener, pa ručno ažuriramo lokalnu listu
+              this.korisnici = this.korisnici.filter(k => k.uid !== uid);
+              this.filtrirani = this.filtrirani.filter(k => k.uid !== uid);
+            });
           }
         }
       ]
@@ -63,4 +65,3 @@ export class KorisniciPage implements OnInit {
     await alert.present();
   }
 }
- 

@@ -22,7 +22,7 @@ import { Router } from '@angular/router';
     IonSelectOption, IonSearchbar, CommonModule, FormsModule
   ]
 })
-export class TreneriPage implements OnInit {
+export class TreneriPage {
 
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -44,7 +44,7 @@ export class TreneriPage implements OnInit {
     addIcons({ addOutline, trashOutline });
   }
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.authService.getTreneri().subscribe(data => {
       this.treneri = data;      // čuvamo sve
       this.filtrirani = data;   // na početku prikazujemo sve
@@ -80,35 +80,37 @@ export class TreneriPage implements OnInit {
       return;
     }
 
-    try {
-      await this.authService.register(
-        this.noviTrener.email,
-        this.noviTrener.password,
-        'zaposleni',
-        this.noviTrener.name,
-        this.noviTrener.gender,
-        this.noviTrener.phone
-      );
+    this.authService.register({
+      email: this.noviTrener.email,
+      password: this.noviTrener.password,
+      role: 'zaposleni',
+      name: this.noviTrener.name,
+      gender: this.noviTrener.gender,
+      phone: this.noviTrener.phone
+    }).subscribe({
+      next: async () => {
+        const alert = await this.alertCtrl.create({
+          header: 'Uspeh',
+          message: 'Trener uspešno dodat!',
+          buttons: [{ text: 'OK', handler: () => this.zatvoriFormu() }]
+        });
+        await alert.present();
+      },
+      error: async (error) => {
+        // Firebase REST API vraca gresku u error.error.error.message (npr. EMAIL_EXISTS, WEAK_PASSWORD : ...)
+        let poruka = 'Greška pri dodavanju trenera!';
+        const kod = error?.error?.error?.message || '';
+        if (kod === 'EMAIL_EXISTS') poruka = 'Korisnik sa ovim emailom već postoji!';
+        if (kod.startsWith('WEAK_PASSWORD')) poruka = 'Lozinka mora imati najmanje 6 karaktera!';
 
-      const alert = await this.alertCtrl.create({
-        header: 'Uspeh',
-        message: 'Trener uspešno dodat!',
-        buttons: [{ text: 'OK', handler: () => this.zatvoriFormu() }]
-      });
-      await alert.present();
-
-    } catch (error: any) {
-      let poruka = 'Greška pri dodavanju trenera!';
-      if (error.code === 'auth/email-already-in-use') poruka = 'Korisnik sa ovim emailom već postoji!';
-      if (error.code === 'auth/weak-password') poruka = 'Lozinka mora imati najmanje 6 karaktera!';
-
-      const alert = await this.alertCtrl.create({
-        header: 'Greška',
-        message: poruka,
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+        const alert = await this.alertCtrl.create({
+          header: 'Greška',
+          message: poruka,
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    });
   }
 
   async obrisiTrenera(uid: string) {
@@ -120,8 +122,12 @@ export class TreneriPage implements OnInit {
         {
           text: 'Obriši',
           role: 'destructive',
-          handler: async () => {
-            await this.authService.deleteUser(uid); // brisanje kroz servis
+          handler: () => {
+            this.authService.deleteUser(uid).subscribe(() => { // brisanje kroz servis
+              // GET više nije realtime listener, pa ručno ažuriramo lokalnu listu
+              this.treneri = this.treneri.filter(t => t.uid !== uid);
+              this.filtrirani = this.filtrirani.filter(t => t.uid !== uid);
+            });
           }
         }
       ]

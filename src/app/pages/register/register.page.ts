@@ -29,8 +29,8 @@ export class RegisterPage {
   loadingCtrl: LoadingController = inject(LoadingController);
   alertCtrl: AlertController = inject(AlertController);
 
-  registerForm = new FormGroup({ //cela forma, provera validnosti, i cuve i provera
-    name: new FormControl('', Validators.required),// jedno polje, ima tr vrenost i validaciju
+  registerForm = new FormGroup({ // cela forma, provera validnosti, cuva i proverava
+    name: new FormControl('', Validators.required), // jedno polje, ima tri vrednosti i validaciju
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     gender: new FormControl('', Validators.required),
@@ -44,7 +44,7 @@ export class RegisterPage {
   async register() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
-      const alert = await this.alertCtrl.create({ //popup
+      const alert = await this.alertCtrl.create({ // popup
         header: 'Greška',
         message: 'Sva polja su obavezna!',
         buttons: ['OK']
@@ -58,28 +58,37 @@ export class RegisterPage {
     });
     await loading.present();
 
-    try {
-      const { name, email, password, gender, phone } = this.registerForm.value;
-      await this.authService.register(email!, password!, 'klijent', name!, gender!, phone!);
-      await loading.dismiss(); // uklanjamo spinner
+    const { name, email, password, gender, phone } = this.registerForm.value;
 
-      const alert = await this.alertCtrl.create({
-        header: 'Uspeh',
-        message: 'Registracija uspešna!',
-        buttons: ['OK']
-      });
-      await alert.present();
-      this.router.navigate(['/klijent']);
+    this.authService.register({
+      email: email!,
+      password: password!,
+      role: 'klijent',
+      name: name!,
+      gender: gender!,
+      phone: phone!
+    }).subscribe({
+      next: async () => {
+        await loading.dismiss(); // uklanjamo spinner
 
-    } catch (error) {
-      await loading.dismiss(); 
-      const alert = await this.alertCtrl.create({ // obrada gresaka
-        header: 'Greška',
-        message: 'Greška pri registraciji. Pokušajte ponovo!',
-        buttons: ['OK']
-      });
-      await alert.present();
-    }
+        const alert = await this.alertCtrl.create({
+          header: 'Uspeh',
+          message: 'Registracija uspešna!',
+          buttons: ['OK']
+        });
+        await alert.present();
+        this.router.navigate(['/klijent']);
+      },
+      error: async () => {
+        await loading.dismiss();
+        const alert = await this.alertCtrl.create({ // obrada grešaka
+          header: 'Greška',
+          message: 'Greška pri registraciji. Pokušajte ponovo!',
+          buttons: ['OK']
+        });
+        await alert.present();
+      }
+    });
   }
 
   goToLogin() {
