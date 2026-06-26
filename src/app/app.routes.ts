@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './services/auth.guard';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
+    canActivate: [authGuard], // samo prijavljeni korisnici mogu da pristupe admin panelu
     loadComponent: () => import('./pages/admin/admin.page').then(m => m.AdminPage),
     children: [
       {
@@ -51,6 +53,7 @@ export const routes: Routes = [
   },
   {
     path: 'zaposleni',
+    canActivate: [authGuard], // samo prijavljeni korisnici mogu da pristupe zaposleni panelu
     loadComponent: () => import('./pages/zaposleni/zaposleni.page').then(m => m.ZaposleniPage),
     children: [
       {
@@ -62,7 +65,6 @@ export const routes: Routes = [
         path: 'moji-treninzi',
         loadComponent: () => import('./pages/zaposleni/moji-treninzi/moji-treninzi.page').then(m => m.MojiTreninziPage)
       },
-      
       {
         path: 'statistika',
         loadComponent: () => import('./pages/zaposleni/statistika/statistika.page').then(m => m.StatistikaPage)
@@ -74,12 +76,13 @@ export const routes: Routes = [
     ]
   },
   {
-    path: 'klijent',                                                              
+    path: 'klijent',
+    canActivate: [authGuard], // samo prijavljeni korisnici mogu da pristupe klijent panelu
     loadComponent: () => import('./pages/klijent/klijent.page').then(m => m.KlijentPage),
-    children: [                                                                   
+    children: [
       {
         path: '',
-        redirectTo: 'treninzi',                                                  
+        redirectTo: 'treninzi',
         pathMatch: 'full'
       },
       {

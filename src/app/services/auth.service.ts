@@ -37,7 +37,7 @@ export class AuthService {
 
   http: HttpClient = inject(HttpClient);
 
-  // Bazni URL Realtime Database-a, citamo direktno iz environment.firebase.databaseURL
+  // Bazni URL Realtime Database-a
   private dbUrl = environment.firebase.databaseURL;
 
   constructor() {}
@@ -46,9 +46,15 @@ export class AuthService {
     return this._isUserAuthenticated;
   }
 
-  
+  getToken() {
+    return this.user ? this.user.token : null;
+  }
 
-  // Registracija — kreira nalog preko Auth REST API-ja i cuva dodatne podatke u Realtime Database
+  getUserId() {
+    return this.user ? this.user.id : null;
+  }
+
+  // Registracija — kreira nalog preko Auth REST API-ja i cuva podatke u bazi
   register(data: RegisterData): Observable<AuthResponseData> {
     return this.http
       .post<AuthResponseData>(
@@ -68,9 +74,23 @@ export class AuthService {
             phone: data.phone,
           };
 
-          // PUT na users/uid.json je ekvivalent AngularFire-ovom set()
+          // Nakon registracije token se cuva pa ga koristimo odmah
+          const expirationTime = new Date(
+            new Date().getTime() + +authData.expiresIn * 1000,
+          );
+          this.user = new User(
+            authData.localId,
+            authData.email,
+            authData.idToken,
+            expirationTime,
+          );
+
+          // PUT cuva korisnika u bazi sa tokenom
           return this.http
-            .put(`${this.dbUrl}/users/${authData.localId}.json`, noviKorisnik)
+            .put(
+              `${this.dbUrl}/users/${authData.localId}.json?auth=${authData.idToken}`,
+              noviKorisnik,
+            )
             .pipe(map(() => authData));
         }),
       );
@@ -105,35 +125,33 @@ export class AuthService {
     this.user = null;
   }
 
-  getToken() {
-    return this.user ? this.user.token : null;
-  }
-
-  getUserId() {
-    return this.user ? this.user.id : null;
-  }
-
-  
-
   // Nadji ulogu korisnika po uid
   getUserRole(uid: string): Observable<string> {
     return this.http
-      .get<any>(`${this.dbUrl}/users/${uid}.json`)
+      .get<any>(`${this.dbUrl}/users/${uid}.json?auth=${this.getToken()}`)
       .pipe(map((data) => (data ? data.role : '')));
   }
 
   // Nadji jednog korisnika po uid
   getUserById(uid: string): Observable<any> {
-    return this.http.get<any>(`${this.dbUrl}/users/${uid}.json`);
+    return this.http.get<any>(
+      `${this.dbUrl}/users/${uid}.json?auth=${this.getToken()}`,
+    );
   }
 
   // Nadji sve korisnike
   getKorisnici(): Observable<any[]> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/users.json`).pipe(
-      map((data) =>
-        data ? Object.keys(data).map((key) => ({ ...data[key], uid: key })) : [],
-      ),
-    );
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/users.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        map((data) =>
+          data
+            ? Object.keys(data).map((key) => ({ ...data[key], uid: key }))
+            : [],
+        ),
+      );
   }
 
   // Nadji sve klijente
@@ -150,29 +168,39 @@ export class AuthService {
     );
   }
 
-  // Azuriranje korisnika — PATCH menja samo poslata polja (kao AngularFire update())
+  // Azuriranje korisnika — PATCH menja samo poslata polja
   updateUser(uid: string, data: any): Observable<any> {
-    return this.http.patch(`${this.dbUrl}/users/${uid}.json`, data);
+    return this.http.patch(
+      `${this.dbUrl}/users/${uid}.json?auth=${this.getToken()}`,
+      data,
+    );
   }
 
   // Brisanje korisnika
   deleteUser(uid: string): Observable<any> {
-    return this.http.delete(`${this.dbUrl}/users/${uid}.json`);
+    return this.http.delete(
+      `${this.dbUrl}/users/${uid}.json?auth=${this.getToken()}`,
+    );
   }
-
-
 
   // Nadji sve treninge
   getTreninzi(): Observable<any[]> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/treninzi.json`).pipe(
-      map((data) =>
-        data
-          ? Object.keys(data)
-              .map((key) => ({ ...data[key], id: key }))
-              .sort((a, b) => new Date(a.datum).getTime() - new Date(b.datum).getTime())
-          : [],
-      ),
-    );
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/treninzi.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        map((data) =>
+          data
+            ? Object.keys(data)
+                .map((key) => ({ ...data[key], id: key }))
+                .sort(
+                  (a, b) =>
+                    new Date(a.datum).getTime() - new Date(b.datum).getTime(),
+                )
+            : [],
+        ),
+      );
   }
 
   // Nadji treninge za odredjenog trenera
@@ -182,40 +210,52 @@ export class AuthService {
     );
   }
 
-  // Dodaj trening — POST na treninzi.json sam generise id (kao push())
+  // Dodaj trening — POST generise automatski id
   dodajTrening(trening: any): Observable<{ name: string }> {
-    return this.http.post<{ name: string }>(`${this.dbUrl}/treninzi.json`, trening);
+    return this.http.post<{ name: string }>(
+      `${this.dbUrl}/treninzi.json?auth=${this.getToken()}`,
+      trening,
+    );
   }
 
   // Obrisi trening
   obrisiTrening(id: string): Observable<any> {
-    return this.http.delete(`${this.dbUrl}/treninzi/${id}.json`);
+    return this.http.delete(
+      `${this.dbUrl}/treninzi/${id}.json?auth=${this.getToken()}`,
+    );
   }
 
   // Azuriraj trening
   updateTrening(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.dbUrl}/treninzi/${id}.json`, data);
+    return this.http.patch(
+      `${this.dbUrl}/treninzi/${id}.json?auth=${this.getToken()}`,
+      data,
+    );
   }
 
   // Nadji trening po id
   getTreningById(id: string): Observable<any> {
     return this.http
-      .get<any>(`${this.dbUrl}/treninzi/${id}.json`)
+      .get<any>(`${this.dbUrl}/treninzi/${id}.json?auth=${this.getToken()}`)
       .pipe(map((data) => (data ? { ...data, id } : null)));
   }
 
-  
   // Proveri da li je klijent vec prijavljen na trening
   jePrijavljen(klijentUid: string, treningId: string): Observable<boolean> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/prijave.json`).pipe(
-      map((data) =>
-        data
-          ? Object.values(data).some(
-              (p: any) => p.klijentUid === klijentUid && p.treningId === treningId,
-            )
-          : false,
-      ),
-    );
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/prijave.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        map((data) =>
+          data
+            ? Object.values(data).some(
+                (p: any) =>
+                  p.klijentUid === klijentUid && p.treningId === treningId,
+              )
+            : false,
+        ),
+      );
   }
 
   // Prijavi klijenta na trening
@@ -226,86 +266,110 @@ export class AuthService {
       datumPrijave: new Date().toISOString(),
     };
 
-    return this.http.post(`${this.dbUrl}/prijave.json`, novaPrijava).pipe(
-      switchMap(() =>
-        this.getTreningById(treningId).pipe(
-          switchMap((trening) => {
-            const trenutniBroj = trening?.prijavljeni || 0;
-            return this.http.patch(`${this.dbUrl}/treninzi/${treningId}.json`, {
-              prijavljeni: trenutniBroj + 1,
-            });
-          }),
+    return this.http
+      .post(
+        `${this.dbUrl}/prijave.json?auth=${this.getToken()}`,
+        novaPrijava,
+      )
+      .pipe(
+        switchMap(() =>
+          this.getTreningById(treningId).pipe(
+            switchMap((trening) => {
+              const trenutniBroj = trening?.prijavljeni || 0;
+              return this.http.patch(
+                `${this.dbUrl}/treninzi/${treningId}.json?auth=${this.getToken()}`,
+                { prijavljeni: trenutniBroj + 1 },
+              );
+            }),
+          ),
         ),
-      ),
-    );
+      );
   }
 
   // Nadji termine klijenta
   getTerminiKlijenta(klijentUid: string): Observable<any[]> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/prijave.json`).pipe(
-      switchMap((data) => {
-        if (!data) return of([]);
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/prijave.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        switchMap((data) => {
+          if (!data) return of([]);
 
-        const prijave = Object.keys(data)
-          .map((key) => ({ ...data[key], prijavaId: key }))
-          .filter((p) => p.klijentUid === klijentUid);
+          const prijave = Object.keys(data)
+            .map((key) => ({ ...data[key], prijavaId: key }))
+            .filter((p) => p.klijentUid === klijentUid);
 
-        if (prijave.length === 0) return of([]);
+          if (prijave.length === 0) return of([]);
 
-        const treninziObservables = prijave.map((p) =>
-          this.getTreningById(p.treningId).pipe(
-            map((trening) =>
-              trening ? { ...trening, treningId: p.treningId, prijavaId: p.prijavaId } : null,
+          const treninziObservables = prijave.map((p) =>
+            this.getTreningById(p.treningId).pipe(
+              map((trening) =>
+                trening
+                  ? { ...trening, treningId: p.treningId, prijavaId: p.prijavaId }
+                  : null,
+              ),
             ),
-          ),
-        );
+          );
 
-        return forkJoin(treninziObservables).pipe(
-          map((svi) =>
-            svi
-              .filter((t) => t !== null)
-              .sort((a: any, b: any) => new Date(a.datum).getTime() - new Date(b.datum).getTime()),
-          ),
-        );
-      }),
-    );
+          return forkJoin(treninziObservables).pipe(
+            map((svi) =>
+              svi
+                .filter((t) => t !== null)
+                .sort(
+                  (a: any, b: any) =>
+                    new Date(a.datum).getTime() - new Date(b.datum).getTime(),
+                ),
+            ),
+          );
+        }),
+      );
   }
 
   // Otkazi termin
   otkaziTermin(prijavaId: string, treningId: string): Observable<any> {
-    return this.http.delete(`${this.dbUrl}/prijave/${prijavaId}.json`).pipe(
-      switchMap(() =>
-        this.getTreningById(treningId).pipe(
-          switchMap((trening) => {
-            const trenutniBroj = trening?.prijavljeni || 0;
-            return this.http.patch(`${this.dbUrl}/treninzi/${treningId}.json`, {
-              prijavljeni: Math.max(0, trenutniBroj - 1),
-            });
-          }),
+    return this.http
+      .delete(`${this.dbUrl}/prijave/${prijavaId}.json?auth=${this.getToken()}`)
+      .pipe(
+        switchMap(() =>
+          this.getTreningById(treningId).pipe(
+            switchMap((trening) => {
+              const trenutniBroj = trening?.prijavljeni || 0;
+              return this.http.patch(
+                `${this.dbUrl}/treninzi/${treningId}.json?auth=${this.getToken()}`,
+                { prijavljeni: Math.max(0, trenutniBroj - 1) },
+              );
+            }),
+          ),
         ),
-      ),
-    );
+      );
   }
 
   // Nadji klijente prijavljene na trening
   getKlijentiZaTrening(treningId: string): Observable<any[]> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/prijave.json`).pipe(
-      switchMap((data) => {
-        if (!data) return of([]);
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/prijave.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        switchMap((data) => {
+          if (!data) return of([]);
 
-        const prijave = Object.values(data).filter((p: any) => p.treningId === treningId);
-        if (prijave.length === 0) return of([]);
+          const prijave = Object.values(data).filter(
+            (p: any) => p.treningId === treningId,
+          );
+          if (prijave.length === 0) return of([]);
 
-        const korisniciObservables = prijave.map((p: any) => this.getUserById(p.klijentUid));
+          const korisniciObservables = prijave.map((p: any) =>
+            this.getUserById(p.klijentUid),
+          );
 
-        return forkJoin(korisniciObservables).pipe(
-          map((lista) => lista.filter((k) => k !== null)),
-        );
-      }),
-    );
+          return forkJoin(korisniciObservables).pipe(
+            map((lista) => lista.filter((k) => k !== null)),
+          );
+        }),
+      );
   }
-
-
 
   // Snimi prisustvo kada zaposleni skenira QR
   snimiPrisustvo(klijentUid: string): Observable<string> {
@@ -315,7 +379,9 @@ export class AuthService {
 
     return this.getTreninzi().pipe(
       switchMap((treninzi) => {
-        const odgovarajuci = treninzi.filter((t) => t.datum >= minus15 && t.datum <= plus15);
+        const odgovarajuci = treninzi.filter(
+          (t) => t.datum >= minus15 && t.datum <= plus15,
+        );
         if (odgovarajuci.length === 0) return of('nema_treninga');
 
         const trening = odgovarajuci[0];
@@ -324,34 +390,43 @@ export class AuthService {
           switchMap((prijavljen) => {
             if (!prijavljen) return of('nije_prijavljen');
 
-            return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/prisustvo.json`).pipe(
-              switchMap((prisustvoData) => {
-                if (prisustvoData) {
-                  const vecEvidentiran = Object.values(prisustvoData).some(
-                    (p: any) => p.klijentUid === klijentUid && p.treningId === trening.id,
+            return this.http
+              .get<{ [key: string]: any }>(
+                `${this.dbUrl}/prisustvo.json?auth=${this.getToken()}`,
+              )
+              .pipe(
+                switchMap((prisustvoData) => {
+                  if (prisustvoData) {
+                    const vecEvidentiran = Object.values(prisustvoData).some(
+                      (p: any) =>
+                        p.klijentUid === klijentUid &&
+                        p.treningId === trening.id,
+                    );
+                    if (vecEvidentiran) return of('vec_evidentiran');
+                  }
+
+                  return this.getUserById(klijentUid).pipe(
+                    switchMap((korisnik) => {
+                      const ime = korisnik ? korisnik.name : 'Nepoznat';
+
+                      const novoPrisustvo = {
+                        klijentUid,
+                        ime,
+                        treningId: trening.id,
+                        treningNaziv: trening.naziv,
+                        datum: new Date().toISOString(),
+                      };
+
+                      return this.http
+                        .post(
+                          `${this.dbUrl}/prisustvo.json?auth=${this.getToken()}`,
+                          novoPrisustvo,
+                        )
+                        .pipe(map(() => 'ok'));
+                    }),
                   );
-                  if (vecEvidentiran) return of('vec_evidentiran');
-                }
-
-                return this.getUserById(klijentUid).pipe(
-                  switchMap((korisnik) => {
-                    const ime = korisnik ? korisnik.name : 'Nepoznat';
-
-                    const novoPrisustvo = {
-                      klijentUid,
-                      ime,
-                      treningId: trening.id,
-                      treningNaziv: trening.naziv,
-                      datum: new Date().toISOString(),
-                    };
-
-                    return this.http
-                      .post(`${this.dbUrl}/prisustvo.json`, novoPrisustvo)
-                      .pipe(map(() => 'ok'));
-                  }),
-                );
-              }),
-            );
+                }),
+              );
           }),
         );
       }),
@@ -360,21 +435,36 @@ export class AuthService {
 
   // Nadji sva prisustva sortirana po datumu
   getPrisustva(): Observable<any[]> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/prisustvo.json`).pipe(
-      map((data) =>
-        data
-          ? Object.keys(data)
-              .map((key) => ({ ...data[key], id: key }))
-              .sort((a, b) => new Date(b.datum).getTime() - new Date(a.datum).getTime())
-          : [],
-      ),
-    );
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/prisustvo.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        map((data) =>
+          data
+            ? Object.keys(data)
+                .map((key) => ({ ...data[key], id: key }))
+                .sort(
+                  (a, b) =>
+                    new Date(b.datum).getTime() - new Date(a.datum).getTime(),
+                )
+            : [],
+        ),
+      );
   }
 
   // Nadji sve prijave
   getPrijave(): Observable<any[]> {
-    return this.http.get<{ [key: string]: any }>(`${this.dbUrl}/prijave.json`).pipe(
-      map((data) => (data ? Object.keys(data).map((key) => ({ ...data[key], id: key })) : [])),
-    );
+    return this.http
+      .get<{ [key: string]: any }>(
+        `${this.dbUrl}/prijave.json?auth=${this.getToken()}`,
+      )
+      .pipe(
+        map((data) =>
+          data
+            ? Object.keys(data).map((key) => ({ ...data[key], id: key }))
+            : [],
+        ),
+      );
   }
 }
