@@ -14,15 +14,26 @@
     <h1 class="title">Provera QR Koda</h1>
     <p class="subtitle">Skenirajte QR kod klijenta</p>
 
-    <ion-button expand="block" class="skener-btn" (click)="startSkeniranje()">
+    <ion-button expand="block" class="skener-btn" (click)="startSkeniranje()" *ngIf="!skeniranje">
       Pokreni skener
     </ion-button>
+
+    <ion-button expand="block" color="danger" class="skener-btn" (click)="stopKamera()" *ngIf="skeniranje">
+      Zaustavi skener
+    </ion-button>
+
+    <!-- Video i canvas za web skener -->
+    <div class="video-container" *ngIf="skeniranje">
+      <video #video playsinline style="width: 100%; border-radius: 12px;"></video>
+      <canvas #canvas style="display: none;"></canvas>
+      <p class="scan-hint">Usmjerite kameru ka QR kodu...</p>
+    </div>
 
     <ion-card class="rezultat-card validan-card" *ngIf="validan && korisnik">
       <ion-card-content>
         <div class="rezultat-header">
           <ion-icon name="checkmark-circle-outline" class="validan-icon"></ion-icon>
-          <h2>QR Kod je autentičan </h2>
+          <h2>QR Kod je autentičan</h2>
         </div>
         <div class="korisnik-info">
           <p><strong>Ime:</strong> {{ korisnik.name }}</p>
@@ -31,6 +42,7 @@
           <p><strong>Pol:</strong> {{ korisnik.gender }}</p>
           <p><strong>Telefon:</strong> {{ korisnik.phone }}</p>
         </div>
+        <p *ngIf="poruka" style="color: orange; margin-top: 8px;">{{ poruka }}</p>
       </ion-card-content>
     </ion-card>
 
@@ -40,7 +52,7 @@
           <ion-icon name="close-circle-outline" class="nevalidan-icon"></ion-icon>
           <h2>QR Kod nije validan!</h2>
         </div>
-        <p>Ovaj QR kod ne postoji u sistemu.</p>
+        <p>{{ poruka || 'Ovaj QR kod ne postoji u sistemu.' }}</p>
       </ion-card-content>
     </ion-card>
 

@@ -92,6 +92,11 @@ export class TreninziPage {
     };
   }
 
+  // Konvertuje lokalno vrijeme u UTC ISO string
+  private toUTC(localDateStr: string): string {
+    return new Date(localDateStr).toISOString();
+  }
+
   async dodajTrening() {
     if (!this.noviTrening.naziv || !this.noviTrening.trenerUid) {
       const alert = await this.alertCtrl.create({
@@ -106,17 +111,17 @@ export class TreninziPage {
     const trener = this.treneri.find(t => t.uid === this.noviTrening.trenerUid);
     this.noviTrening.trenerIme = trener ? trener.name : '';
 
+    const datumUTC = this.toUTC(this.noviTrening.datum);
+
     if (this.editMode) {
-      // IZMENA postojećeg treninga
       this.authService.updateTrening(this.editTreningId, {
         naziv: this.noviTrening.naziv,
         trenerUid: this.noviTrening.trenerUid,
         trenerIme: this.noviTrening.trenerIme,
-        datum: this.noviTrening.datum,
+        datum: datumUTC,
         kapacitet: Number(this.noviTrening.kapacitet)
       }).subscribe({
         next: async () => {
-          // GET više nije realtime listener, pa ručno ažuriramo lokalnu listu
           const idx = this.treninzi.findIndex(t => t.id === this.editTreningId);
           if (idx !== -1) {
             this.treninzi[idx] = {
@@ -124,7 +129,7 @@ export class TreninziPage {
               naziv: this.noviTrening.naziv,
               trenerUid: this.noviTrening.trenerUid,
               trenerIme: this.noviTrening.trenerIme,
-              datum: this.noviTrening.datum,
+              datum: datumUTC,
               kapacitet: Number(this.noviTrening.kapacitet)
             };
             this.treninzi.sort((a: any, b: any) =>
@@ -151,23 +156,21 @@ export class TreninziPage {
       });
 
     } else {
-      // DODAVANJE novog treninga
       this.authService.dodajTrening({
         naziv: this.noviTrening.naziv,
         trenerUid: this.noviTrening.trenerUid,
         trenerIme: this.noviTrening.trenerIme,
-        datum: this.noviTrening.datum,
+        datum: datumUTC,
         kapacitet: Number(this.noviTrening.kapacitet),
         prijavljeni: 0
       }).subscribe({
         next: async (response) => {
-          // POST vraca { name: 'generisaniKljuc' }, kao push() ranije
           this.treninzi.push({
             id: response.name,
             naziv: this.noviTrening.naziv,
             trenerUid: this.noviTrening.trenerUid,
             trenerIme: this.noviTrening.trenerIme,
-            datum: this.noviTrening.datum,
+            datum: datumUTC,
             kapacitet: Number(this.noviTrening.kapacitet),
             prijavljeni: 0
           });
@@ -206,7 +209,6 @@ export class TreninziPage {
           role: 'destructive',
           handler: () => {
             this.authService.obrisiTrening(id).subscribe(() => {
-              // GET više nije realtime listener, pa ručno ažuriramo lokalnu listu
               this.treninzi = this.treninzi.filter(t => t.id !== id);
             });
           }

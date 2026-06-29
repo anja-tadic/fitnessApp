@@ -382,6 +382,7 @@ export class AuthService {
         const odgovarajuci = treninzi.filter(
           (t) => t.datum >= minus15 && t.datum <= plus15,
         );
+        // alert('Sada: ' + sad.toISOString() + ' | Treninga: ' + odgovarajuci.length + ' | Minus15: ' + minus15 + ' | Plus15: ' + plus15);
         if (odgovarajuci.length === 0) return of('nema_treninga');
 
         const trening = odgovarajuci[0];
